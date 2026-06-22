@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚙️ Admin · TrackVerse Apps</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  :root {
+    --ac: #10b981;
+    --ac2: #06b6d4;
+    --bg: #0d0d1a;
+    --bg-card: #1a1a2e;
+    --bg-card-hover: #1e1e38;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --border: #2d2d4e;
+    --danger: #ef4444;
+    --warn: #f59e0b;
+    --info: #3b82f6;
+    --success: #22c55e;
+  }
+  body { background:var(--bg); color:var(--text); font-family:'Segoe UI',-apple-system,sans-serif; line-height:1.6; min-height:100vh; }
+
+  /* LOGIN */
+  .login-wrap { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
+  .login-card { background:var(--bg-card); border:1px solid var(--border); border-radius:20px; padding:36px 28px; max-width:380px; width:100%; }
+  .login-logo { font-size:3rem; text-align:center; margin-bottom:8px; }
+  .login-title { text-align:center; font-size:1.4rem; font-weight:900; margin-bottom:4px; background:linear-gradient(135deg,var(--ac),var(--ac2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .login-sub { text-align:center; color:var(--muted); font-size:0.82rem; margin-bottom:24px; }
+  .login-input { width:100%; padding:14px 16px; background:var(--bg); border:1px solid var(--border); border-radius:12px; color:var(--text); font-size:0.95rem; outline:none; font-family:inherit; margin-bottom:10px; }
+  .login-input:focus { border-color:var(--ac); }
+  .login-btn { width:100%; padding:14px; background:linear-gradient(135deg,var(--ac),var(--ac2)); border:none; border-radius:12px; color:#fff; font-size:0.95rem; font-weight:800; cursor:pointer; font-family:inherit; }
+  .login-error { color:var(--danger); font-size:0.78rem; text-align:center; margin-top:10px; min-height:1rem; }
+
+  /* TOPBAR */
+  .topbar { position:sticky; top:0; z-index:100; background:rgba(13,13,26,0.95); backdrop-filter:blur(12px); border-bottom:1px solid var(--border); padding:14px 16px; display:flex; align-items:center; gap:12px; }
+  .topbar h1 { font-size:1.05rem; flex:1; background:linear-gradient(135deg,var(--ac),var(--ac2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-weight:900; }
+  .icon-btn { background:var(--bg-card); border:1px solid var(--border); color:var(--text); padding:8px 12px; border-radius:10px; cursor:pointer; font-size:0.85rem; font-family:inherit; }
+  .icon-btn:hover { background:var(--bg-card-hover); }
+
+  /* LAYOUT */
+  .admin-wrap { max-width:900px; margin:0 auto; padding:20px 16px 60px; }
+
+  /* SECCIONES */
+  .section { background:var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:18px; margin-bottom:16px; }
+  .section-title { font-size:0.95rem; font-weight:800; color:var(--ac); margin-bottom:14px; display:flex; align-items:center; gap:8px; padding-bottom:10px; border-bottom:1px solid var(--border); }
+
+  /* TABS */
+  .tabs { display:flex; gap:6px; margin-bottom:16px; overflow-x:auto; }
+  .tab { background:var(--bg-card); border:1px solid var(--border); color:var(--muted); padding:10px 16px; border-radius:10px; cursor:pointer; font-size:0.82rem; white-space:nowrap; transition:all 0.15s; font-family:inherit; }
+  .tab:hover { background:var(--bg-card-hover); }
+  .tab.active { background:linear-gradient(135deg,var(--ac),var(--ac2)); color:#fff; border-color:transparent; }
+
+  /* FORM */
+  .form-row { margin-bottom:12px; }
+  .form-label { font-size:0.78rem; color:var(--muted); margin-bottom:4px; display:block; font-weight:600; }
+  .form-input { width:100%; padding:10px 12px; background:var(--bg); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:0.88rem; outline:none; font-family:inherit; }
+  .form-input:focus { border-color:var(--ac); }
+  .form-row-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .form-help { font-size:0.7rem; color:var(--muted); margin-top:4px; }
+  .form-textarea { width:100%; padding:10px 12px; background:var(--bg); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:0.85rem; outline:none; font-family:inherit; resize:vertical; min-height:60px; }
+
+  /* BUTTONS */
+  .btn { padding:10px 16px; border:none; border-radius:10px; cursor:pointer; font-size:0.85rem; font-weight:700; font-family:inherit; transition:transform 0.15s; }
+  .btn:active { transform:scale(0.97); }
+  .btn-primary { background:linear-gradient(135deg,var(--ac),var(--ac2)); color:#fff; }
+  .btn-secondary { background:var(--bg); color:var(--text); border:1px solid var(--border); }
+  .btn-danger { background:rgba(239,68,68,0.15); color:var(--danger); border:1px solid rgba(239,68,68,0.3); }
+  .btn-warn { background:rgba(245,158,11,0.15); color:var(--warn); border:1px solid rgba(245,158,11,0.3); }
+  .btn-row { display:flex; gap:8px; margin-top:14px; }
+
+  /* APPS LIST */
+  .app-item { background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:14px; margin-bottom:10px; display:flex; align-items:center; gap:12px; }
+  .app-item-icon { font-size:1.8rem; }
+  .app-item-info { flex:1; min-width:0; }
+  .app-item-name { font-weight:700; color:var(--text); font-size:0.92rem; }
+  .app-item-meta { font-size:0.72rem; color:var(--muted); margin-top:2px; }
+  .app-item-actions { display:flex; gap:6px; }
+  .app-item-actions .btn { padding:6px 10px; font-size:0.75rem; }
+
+  /* COLOR PICKER */
+  .color-row { display:flex; align-items:center; gap:10px; }
+  .color-input { width:48px; height:36px; padding:0; border:1px solid var(--border); border-radius:8px; background:transparent; cursor:pointer; }
+  .color-text { flex:1; }
+
+  /* TOAST */
+  .toast { position:fixed; bottom:30px; left:50%; transform:translateX(-50%); background:var(--bg-card); border:1px solid var(--border); color:var(--text); padding:12px 20px; border-radius:12px; font-size:0.82rem; box-shadow:0 8px 30px rgba(0,0,0,0.4); z-index:2000; opacity:0; transition:opacity 0.25s, transform 0.25s; pointer-events:none; max-width:90%; text-align:center; }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(-6px); }
+
+  /* EMPTY */
+  .empty { text-align:center; padding:30px 20px; color:var(--muted); font-size:0.85rem; }
+
+  /* MODAL */
+  .modal { position:fixed; inset:0; background:rgba(0,0,0,0.85); display:none; align-items:center; justify-content:center; padding:20px; z-index:1000; }
+  .modal.show { display:flex; }
+  .modal-card { background:var(--bg-card); border:1px solid var(--border); border-radius:18px; padding:24px; max-width:500px; width:100%; max-height:90vh; overflow-y:auto; }
+  .modal-title { font-size:1.05rem; font-weight:800; margin-bottom:14px; }
+
+  /* INFO BOX */
+  .info-box { background:rgba(59,130,246,0.08); border:1px solid rgba(59,130,246,0.3); border-radius:10px; padding:12px 14px; font-size:0.78rem; color:var(--info); margin-top:10px; line-height:1.6; }
+  .info-box strong { color:#fff; }
+  .info-box code { background:rgba(0,0,0,0.3); padding:1px 5px; border-radius:4px; font-size:0.78rem; }
+
+  /* FOOTER */
+  .footer { text-align:center; color:var(--muted); font-size:0.7rem; padding:20px; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-view" class="login-wrap">
+  <div class="login-card">
+    <div class="login-logo">⚙️</div>
+    <div class="login-title">Panel Admin</div>
+    <div class="login-sub">TrackVerse Apps · Acceso administrador</div>
+    <input type="password" id="login-input" class="login-input" placeholder="Password admin..." onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">🔓 Acceder</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="admin-app" style="display:none">
+  <div class="topbar">
+    <h1>⚙️ Admin · <span id="hub-title">TrackVerse</span></h1>
+    <button class="icon-btn" onclick="location.href='apps.html'">📦 Catálogo</button>
+    <button class="icon-btn" onclick="logout()">🚪 Salir</button>
+  </div>
+
+  <div class="admin-wrap">
+    <!-- TABS -->
+    <div class="tabs">
+      <div class="tab active" onclick="showTab('apps',this)">📦 Apps</div>
+      <div class="tab" onclick="showTab('theme',this)">🎨 Theme Studio</div>
+      <div class="tab" onclick="showTab('security',this)">🔐 Seguridad</div>
+      <div class="tab" onclick="showTab('config',this)">⚙️ Config</div>
+      <div class="tab" onclick="showTab('help',this)">❓ Ayuda</div>
+    </div>
+
+    <!-- TAB: APPS -->
+    <div id="tab-apps">
+      <div class="section">
+        <div class="section-title">📦 Apps del catálogo (<span id="apps-count">0</span>)</div>
+        <div id="apps-list"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="openAppModal()">➕ Agregar app</button>
+          <button class="btn btn-secondary" onclick="cargarDatos()">🔄 Recargar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: THEME -->
+    <div id="tab-theme" style="display:none">
+      <div class="section">
+        <div class="section-title">🎨 Theme Studio · Personalizá los colores</div>
+        <div class="form-row">
+          <label class="form-label">Color primario</label>
+          <div class="color-row">
+            <input type="color" id="color-primario" class="color-input" value="#10b981" oninput="previewTheme()">
+            <input type="text" id="color-primario-text" class="form-input color-text" value="#10b981" oninput="syncColor('primario')">
+          </div>
+        </div>
+        <div class="form-row">
+          <label class="form-label">Color secundario</label>
+          <div class="color-row">
+            <input type="color" id="color-secundario" class="color-input" value="#06b6d4" oninput="previewTheme()">
+            <input type="text" id="color-secundario-text" class="form-input color-text" value="#06b6d4" oninput="syncColor('secundario')">
+          </div>
+        </div>
+        <div class="form-row">
+          <label class="form-label">Color de fondo</label>
+          <div class="color-row">
+            <input type="color" id="color-fondo" class="color-input" value="#0d0d1a" oninput="previewTheme()">
+            <input type="text" id="color-fondo-text" class="form-input color-text" value="#0d0d1a" oninput="syncColor('fondo')">
+          </div>
+        </div>
+        <div class="form-row">
+          <label class="form-label">Color de cards</label>
+          <div class="color-row">
+            <input type="color" id="color-card" class="color-input" value="#1a1a2e" oninput="previewTheme()">
+            <input type="text" id="color-card-text" class="form-input color-text" value="#1a1a2e" oninput="syncColor('card')">
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="guardarTheme()">💾 Guardar tema</button>
+          <button class="btn btn-secondary" onclick="resetTheme()">↩️ Reset</button>
+        </div>
+        <div class="info-box">
+          ℹ️ Los cambios se aplican inmediatamente en el catálogo. Para que sean permanentes, hay que guardarlos en <code>apps.json</code> (requiere GitHub Token en tab Config).
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: SECURITY -->
+    <div id="tab-security" style="display:none">
+      <div class="section">
+        <div class="section-title">🔐 Passwords de acceso</div>
+        <div class="form-row">
+          <label class="form-label">Password del catálogo (público)</label>
+          <input type="text" id="pass-public" class="form-input" placeholder="Password para ver el catálogo">
+          <div class="form-help">Compartilo con quien quieras que vea/descargue las apps.</div>
+        </div>
+        <div class="form-row">
+          <label class="form-label">Password de admin (este panel)</label>
+          <input type="text" id="pass-admin" class="form-input" placeholder="Password para entrar acá">
+          <div class="form-help">Solo vos deberías tenerlo. Es distinto del catálogo.</div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="guardarPasswords()">💾 Guardar passwords</button>
+        </div>
+        <div class="info-box">
+          ⚠️ Los passwords se guardan en texto plano en <code>apps.json</code>. No es seguridad real, es solo para mantener curiosos fuera. Para seguridad real necesitarías un backend.
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: CONFIG -->
+    <div id="tab-config" style="display:none">
+      <div class="section">
+        <div class="section-title">⚙️ Configuración general</div>
+        <div class="form-row">
+          <label class="form-label">Nombre del catálogo</label>
+          <input type="text" id="cfg-nombre" class="form-input" placeholder="TrackVerse Apps">
+        </div>
+        <div class="form-row">
+          <label class="form-label">Subtítulo</label>
+          <input type="text" id="cfg-subtitulo" class="form-input" placeholder="Catálogo oficial de aplicaciones">
+        </div>
+        <div class="form-row">
+          <label class="form-label">Usuario de GitHub (owner)</label>
+          <input type="text" id="cfg-owner" class="form-input" placeholder="rudyalen">
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="guardarConfig()">💾 Guardar config</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">🔑 GitHub Personal Access Token</div>
+        <div class="form-row">
+          <label class="form-label">Token (ghp_...)</label>
+          <input type="password" id="cfg-token" class="form-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+          <div class="form-help">Necesario para guardar cambios en apps.json. Crealo en github.com/settings/tokens con permiso <code>repo</code>.</div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="guardarToken()">💾 Guardar token</button>
+          <button class="btn btn-danger" onclick="borrarToken()">🗑️ Borrar token</button>
+        </div>
+        <div class="info-box">
+          ℹ️ El token se guarda en el navegador (localStorage). Solo vos lo ves. Si borrás el navegador, hay que volver a ingresarlo.
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: HELP -->
+    <div id="tab-help" style="display:none">
+      <div class="section">
+        <div class="section-title">❓ Cómo usar este panel</div>
+        <h3 style="font-size:0.9rem;color:var(--text);margin-bottom:8px">📦 Agregar una app nueva</h3>
+        <ol style="font-size:0.82rem;color:var(--muted);line-height:1.8;padding-left:20px">
+          <li>Andá al tab <strong>Apps</strong></li>
+          <li>Tocá <strong>"➕ Agregar app"</strong></li>
+          <li>Completá: nombre, icono (emoji), color, repo (ej: rudyalen/fitwallet)</li>
+          <li>Tocá <strong>"Guardar"</strong></li>
+          <li>La app aparece en el catálogo inmediatamente</li>
+        </ol>
+
+        <h3 style="font-size:0.9rem;color:var(--text);margin:14px 0 8px">🎨 Cambiar colores</h3>
+        <ol style="font-size:0.82rem;color:var(--muted);line-height:1.8;padding-left:20px">
+          <li>Andá al tab <strong>Theme Studio</strong></li>
+          <li>Elegí los colores con el selector de color</li>
+          <li>Tocá <strong>"Guardar tema"</strong></li>
+        </ol>
+
+        <h3 style="font-size:0.9rem;color:var(--text);margin:14px 0 8px">🔑 Configurar GitHub Token</h3>
+        <ol style="font-size:0.82rem;color:var(--muted);line-height:1.8;padding-left:20px">
+          <li>Entrá a <code>github.com/settings/tokens</code></li>
+          <li><strong>Generate new token (classic)</strong></li>
+          <li>Nombre: "TrackVerse Hub"</li>
+          <li>Marká el permiso <code>repo</code></li>
+          <li>Generá y copiá el token</li>
+          <li>Pegalo acá en tab <strong>Config</strong></li>
+        </ol>
+
+        <h3 style="font-size:0.9rem;color:var(--text);margin:14px 0 8px">📱 Cómo se suben APKs al catálogo</h3>
+        <p style="font-size:0.82rem;color:var(--muted);line-height:1.7">Cada vez que hacés <code>git push</code> al repo de una app (ridertrack, clientetrack, etc.), el workflow de GitHub Actions construye el APK y crea un <strong>Release</strong> automáticamente. El catálogo lee los releases vía API y los muestra. <strong>No tenés que subir nada manualmente.</strong></p>
+
+        <h3 style="font-size:0.9rem;color:var(--text);margin:14px 0 8px">⚠️ Importante</h3>
+        <ul style="font-size:0.82rem;color:var(--muted);line-height:1.8;padding-left:20px">
+          <li>Los cambios se guardan en <code>apps.json</code> del repo <code>trackverse-hub</code></li>
+          <li>Para que los cambios funcionen, necesitás el GitHub Token configurado</li>
+          <li>Si perdés el token, podés generar uno nuevo y reemplazarlo</li>
+          <li>El catálogo se actualiza cada vez que entrás a la URL (no hay cache)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer">
+      TrackVerse Hub Admin · by Rudy Alen + Zen 🤖 · 2026
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: APP FORM -->
+<div class="modal" id="app-modal" onclick="if(event.target===this)closeAppModal()">
+  <div class="modal-card">
+    <div class="modal-title" id="app-modal-title">➕ Agregar app</div>
+    <input type="hidden" id="app-edit-id">
+    <div class="form-row">
+      <label class="form-label">Nombre *</label>
+      <input type="text" id="app-nombre" class="form-input" placeholder="RiderTrack">
+    </div>
+    <div class="form-row-2">
+      <div class="form-row">
+        <label class="form-label">Icono (emoji) *</label>
+        <input type="text" id="app-icono" class="form-input" placeholder="🛵" maxlength="4">
+      </div>
+      <div class="form-row">
+        <label class="form-label">Color</label>
+        <input type="color" id="app-color" class="form-input" style="height:42px;padding:0" value="#10b981">
+      </div>
+    </div>
+    <div class="form-row">
+      <label class="form-label">Repo de GitHub *</label>
+      <input type="text" id="app-repo" class="form-input" placeholder="rudyalen/ridertrack">
+      <div class="form-help">Formato: usuario/repo (ej: rudyalen/fitwallet)</div>
+    </div>
+    <div class="form-row">
+      <label class="form-label">Descripción</label>
+      <textarea id="app-desc" class="form-textarea" placeholder="App de gestión para motoristas..."></textarea>
+    </div>
+    <div class="form-row-2">
+      <div class="form-row">
+        <label class="form-label">Categoría</label>
+        <input type="text" id="app-categoria" class="form-input" placeholder="Productividad">
+      </div>
+      <div class="form-row">
+        <label class="form-label">Android mínimo</label>
+        <input type="text" id="app-android" class="form-input" placeholder="7.0" value="7.0">
+      </div>
+    </div>
+    <div class="form-row">
+      <label class="form-label">ID único (sin espacios)</label>
+      <input type="text" id="app-id" class="form-input" placeholder="ridertrack">
+      <div class="form-help">Se usa internamente. Si es nueva app, dejalo vacío para autogenerar.</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="guardarApp()">💾 Guardar</button>
+      <button class="btn btn-secondary" onclick="closeAppModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════════════════════
+// TRACKVERSE HUB · Admin Panel
+// ════════════════════════════════════════════════════════════
+
+var HUB_CONFIG = null;
+var HUB_APPS = [];
+var EDITING_APP = null;
+
+// ─── INIT ──────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function(){
+  fetch('apps.json?nocache=' + Date.now())
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      HUB_CONFIG = data.config;
+      HUB_APPS = data.apps;
+      document.getElementById('hub-title').textContent = HUB_CONFIG.nombre;
+      // Verificar sesión admin
+      var savedPass = sessionStorage.getItem('hub-admin-pass');
+      if(savedPass && savedPass === HUB_CONFIG.password_admin){
+        showAdmin();
+      } else {
+        document.getElementById('login-view').style.display = 'flex';
+        document.getElementById('admin-app').style.display = 'none';
+        setTimeout(function(){ document.getElementById('login-input').focus(); }, 100);
+      }
+    })
+    .catch(function(err){
+      document.getElementById('login-error').textContent = 'Error cargando: ' + err.message;
+    });
+});
+
+// ─── LOGIN ─────────────────────────────────────────────────
+function doLogin(){
+  var inp = document.getElementById('login-input');
+  var err = document.getElementById('login-error');
+  var val = inp.value.trim();
+  if(!val){ err.textContent = 'Ingresá el password'; return; }
+  if(val === HUB_CONFIG.password_admin){
+    sessionStorage.setItem('hub-admin-pass', val);
+    err.textContent = '';
+    showAdmin();
+  } else {
+    err.textContent = '❌ Password incorrecto';
+    inp.value = '';
+  }
+}
+
+function logout(){
+  sessionStorage.removeItem('hub-admin-pass');
+  location.reload();
+}
+
+function showAdmin(){
+  document.getElementById('login-view').style.display = 'none';
+  document.getElementById('admin-app').style.display = 'block';
+  cargarDatos();
+}
+
+// ─── TABS ──────────────────────────────────────────────────
+function showTab(name, el){
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+  if(el) el.classList.add('active');
+  ['apps','theme','security','config','help'].forEach(function(t){
+    var v = document.getElementById('tab-' + t);
+    if(v) v.style.display = (t === name) ? 'block' : 'none';
+  });
+  if(name === 'theme') cargarThemeForm();
+  if(name === 'security') cargarPassForm();
+  if(name === 'config') cargarConfigForm();
+}
+
+// ─── CARGAR DATOS A FORMULARIOS ───────────────────────────
+function cargarDatos(){
+  renderAppsList();
+}
+
+function renderAppsList(){
+  var list = document.getElementById('apps-list');
+  document.getElementById('apps-count').textContent = HUB_APPS.length;
+  if(HUB_APPS.length === 0){
+    list.innerHTML = '<div class="empty">No hay apps. Agregá la primera con el botón ➕</div>';
+    return;
+  }
+  list.innerHTML = HUB_APPS.map(function(app){
+    return '<div class="app-item">' +
+      '<div class="app-item-icon" style="color:' + app.color + '">' + app.icono + '</div>' +
+      '<div class="app-item-info">' +
+        '<div class="app-item-name">' + escapeHtml(app.nombre) + (app.visible ? '' : ' <span style="color:var(--muted);font-size:0.7rem">(oculta)</span>') + '</div>' +
+        '<div class="app-item-meta">📦 ' + escapeHtml(app.repo) + ' · 📂 ' + escapeHtml(app.categoria || 'General') + '</div>' +
+      '</div>' +
+      '<div class="app-item-actions">' +
+        '<button class="btn btn-secondary" onclick="toggleVisible(\'' + app.id + '\')">' + (app.visible ? '👁️' : '🚫') + '</button>' +
+        '<button class="btn btn-secondary" onclick="openAppModal(\'' + app.id + '\')">✏️</button>' +
+        '<button class="btn btn-danger" onclick="eliminarApp(\'' + app.id + '\')">🗑️</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function cargarThemeForm(){
+  var c = HUB_CONFIG.colores || {};
+  setVal('color-primario', c.primario || '#10b981');
+  setVal('color-primario-text', c.primario || '#10b981');
+  setVal('color-secundario', c.secundario || '#06b6d4');
+  setVal('color-secundario-text', c.secundario || '#06b6d4');
+  setVal('color-fondo', c.fondo || '#0d0d1a');
+  setVal('color-fondo-text', c.fondo || '#0d0d1a');
+  setVal('color-card', c.fondo_card || '#1a1a2e');
+  setVal('color-card-text', c.fondo_card || '#1a1a2e');
+}
+
+function cargarPassForm(){
+  setVal('pass-public', HUB_CONFIG.password || '');
+  setVal('pass-admin', HUB_CONFIG.password_admin || '');
+}
+
+function cargarConfigForm(){
+  setVal('cfg-nombre', HUB_CONFIG.nombre || '');
+  setVal('cfg-subtitulo', HUB_CONFIG.subtitulo || '');
+  setVal('cfg-owner', HUB_CONFIG.owner || 'rudyalen');
+  var token = localStorage.getItem('hub-github-token') || '';
+  setVal('cfg-token', token);
+}
+
+function setVal(id, val){
+  var el = document.getElementById(id);
+  if(el) el.value = val;
+}
+
+// ─── THEME ────────────────────────────────────────────────
+function syncColor(name){
+  var ci = document.getElementById('color-' + name);
+  var ct = document.getElementById('color-' + name + '-text');
+  if(ci && ct) ci.value = ct.value;
+  previewTheme();
+}
+
+function previewTheme(){
+  var p = document.getElementById('color-primario').value;
+  var s = document.getElementById('color-secundario').value;
+  var bg = document.getElementById('color-fondo').value;
+  var card = document.getElementById('color-card').value;
+  var root = document.documentElement;
+  root.style.setProperty('--ac', p);
+  root.style.setProperty('--ac2', s);
+  root.style.setProperty('--bg', bg);
+  root.style.setProperty('--bg-card', card);
+}
+
+function resetTheme(){
+  cargarThemeForm();
+  previewTheme();
+  toast('Tema reseteado (no guardado)');
+}
+
+function guardarTheme(){
+  HUB_CONFIG.colores = {
+    primario: document.getElementById('color-primario').value,
+    secundario: document.getElementById('color-secundario').value,
+    fondo: document.getElementById('color-fondo').value,
+    fondo_card: document.getElementById('color-card').value,
+    texto: '#e2e8f0',
+    texto_muted: '#94a3b8'
+  };
+  guardarEnRepo('Tema actualizado', function(ok){
+    if(ok) toast('✅ Tema guardado en repo');
+    else toast('⚠️ Guardado local (sin token). Configurá token en tab Config.');
+  });
+}
+
+// ─── PASSWORDS ────────────────────────────────────────────
+function guardarPasswords(){
+  HUB_CONFIG.password = document.getElementById('pass-public').value.trim() || 'TrackVerse2026';
+  HUB_CONFIG.password_admin = document.getElementById('pass-admin').value.trim() || 'TrackVerse2026';
+  guardarEnRepo('Passwords actualizados', function(ok){
+    if(ok) toast('✅ Passwords guardados');
+    else toast('⚠️ Guardado local. Configurá token en tab Config.');
+  });
+}
+
+// ─── CONFIG ───────────────────────────────────────────────
+function guardarConfig(){
+  HUB_CONFIG.nombre = document.getElementById('cfg-nombre').value.trim() || 'TrackVerse Apps';
+  HUB_CONFIG.subtitulo = document.getElementById('cfg-subtitulo').value.trim();
+  HUB_CONFIG.owner = document.getElementById('cfg-owner').value.trim() || 'rudyalen';
+  guardarEnRepo('Config actualizada', function(ok){
+    if(ok) toast('✅ Config guardada');
+    else toast('⚠️ Guardado local. Configurá token.');
+  });
+}
+
+function guardarToken(){
+  var t = document.getElementById('cfg-token').value.trim();
+  if(!t){ toast('Token vacío'); return; }
+  if(t.length < 20){ toast('Token muy corto'); return; }
+  localStorage.setItem('hub-github-token', t);
+  toast('✅ Token guardado en navegador');
+}
+
+function borrarToken(){
+  localStorage.removeItem('hub-github-token');
+  document.getElementById('cfg-token').value = '';
+  toast('🗑️ Token borrado');
+}
+
+// ─── APPS CRUD ────────────────────────────────────────────
+function openAppModal(appId){
+  EDITING_APP = appId ? HUB_APPS.filter(function(a){ return a.id === appId; })[0] : null;
+  document.getElementById('app-modal-title').textContent = EDITING_APP ? '✏️ Editar app' : '➕ Agregar app';
+  if(EDITING_APP){
+    setVal('app-edit-id', EDITING_APP.id);
+    setVal('app-nombre', EDITING_APP.nombre);
+    setVal('app-icono', EDITING_APP.icono);
+    setVal('app-color', EDITING_APP.color);
+    setVal('app-repo', EDITING_APP.repo);
+    setVal('app-desc', EDITING_APP.descripcion);
+    setVal('app-categoria', EDITING_APP.categoria || '');
+    setVal('app-android', EDITING_APP.android_min || '7.0');
+    setVal('app-id', EDITING_APP.id);
+  } else {
+    setVal('app-edit-id', '');
+    setVal('app-nombre', '');
+    setVal('app-icono', '📦');
+    setVal('app-color', '#10b981');
+    setVal('app-repo', '');
+    setVal('app-desc', '');
+    setVal('app-categoria', 'General');
+    setVal('app-android', '7.0');
+    setVal('app-id', '');
+  }
+  document.getElementById('app-modal').classList.add('show');
+}
+
+function closeAppModal(){
+  document.getElementById('app-modal').classList.remove('show');
+}
+
+function guardarApp(){
+  var nombre = document.getElementById('app-nombre').value.trim();
+  var icono = document.getElementById('app-icono').value.trim();
+  var repo = document.getElementById('app-repo').value.trim();
+  if(!nombre){ toast('Falta nombre'); return; }
+  if(!icono){ toast('Falta icono'); return; }
+  if(!repo){ toast('Falta repo'); return; }
+
+  var editId = document.getElementById('app-edit-id').value;
+  var appId = document.getElementById('app-id').value.trim() || (editId || slugify(nombre));
+
+  var datos = {
+    id: appId,
+    nombre: nombre,
+    icono: icono,
+    color: document.getElementById('app-color').value,
+    repo: repo,
+    descripcion: document.getElementById('app-desc').value.trim(),
+    categoria: document.getElementById('app-categoria').value.trim() || 'General',
+    visible: true,
+    android_min: document.getElementById('app-android').value.trim() || '7.0',
+    pais: 'Perú'
+  };
+
+  if(editId){
+    // Editar existente
+    var idx = HUB_APPS.findIndex(function(a){ return a.id === editId; });
+    if(idx !== -1){
+      datos.visible = HUB_APPS[idx].visible;
+      HUB_APPS[idx] = datos;
+    }
+  } else {
+    // Verificar ID único
+    if(HUB_APPS.some(function(a){ return a.id === appId; })){
+      toast('Ya existe una app con ese ID'); return;
+    }
+    HUB_APPS.push(datos);
+  }
+
+  guardarEnRepo(editId ? 'App actualizada: ' + nombre : 'App agregada: ' + nombre, function(ok){
+    if(ok){
+      toast('✅ App guardada en repo');
+      closeAppModal();
+      renderAppsList();
+    } else {
+      toast('⚠️ Guardado local. Configurá token.');
+      closeAppModal();
+      renderAppsList();
+    }
+  });
+}
+
+function toggleVisible(appId){
+  var app = HUB_APPS.filter(function(a){ return a.id === appId; })[0];
+  if(!app) return;
+  app.visible = !app.visible;
+  guardarEnRepo('Visibilidad cambiada: ' + app.nombre, function(ok){
+    renderAppsList();
+    toast(ok ? '✅ Guardado' : '⚠️ Local');
+  });
+}
+
+function eliminarApp(appId){
+  var app = HUB_APPS.filter(function(a){ return a.id === appId; })[0];
+  if(!app) return;
+  if(!confirm('¿Eliminar "' + app.nombre + '" del catálogo?\n(No se borra el repo ni los APKs, solo la entrada del catálogo)')) return;
+  HUB_APPS = HUB_APPS.filter(function(a){ return a.id !== appId; });
+  guardarEnRepo('App eliminada: ' + app.nombre, function(ok){
+    renderAppsList();
+    toast(ok ? '✅ Eliminada' : '⚠️ Local');
+  });
+}
+
+// ─── GUARDAR EN REPO vía GitHub API ───────────────────────
+function guardarEnRepo(mensaje, cb){
+  var token = localStorage.getItem('hub-github-token');
+  if(!token){
+    // Sin token: solo actualiza en memoria
+    if(cb) cb(false);
+    return;
+  }
+  var owner = HUB_CONFIG.owner || 'rudyalen';
+  var repo = 'trackverse-hub';
+  var path = 'apps.json';
+  var url = 'https://api.github.com/repos/' + owner + '/' + repo + '/contents/' + path;
+
+  toast('⏳ Guardando en repo...');
+
+  // 1. Obtener SHA actual del archivo
+  fetch(url, {
+    headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github+json' }
+  })
+  .then(function(r){
+    if(!r.ok) throw new Error('No se pudo acceder al repo. Verificá el token y que el repo exista.');
+    return r.json();
+  })
+  .then(function(data){
+    var sha = data.sha;
+    var content = btoa(unescape(encodeURIComponent(JSON.stringify({
+      config: HUB_CONFIG,
+      apps: HUB_APPS
+    }, null, 2))));
+    // 2. Actualizar archivo
+    return fetch(url, {
+      method: 'PUT',
+      headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: mensaje,
+        content: content,
+        sha: sha
+      })
+    });
+  })
+  .then(function(r){
+    if(!r.ok) throw new Error('Error al actualizar');
+    return r.json();
+  })
+  .then(function(){
+    if(cb) cb(true);
+  })
+  .catch(function(err){
+    console.log('Error guardando:', err);
+    toast('⚠️ ' + err.message);
+    if(cb) cb(false);
+  });
+}
+
+// ─── HELPERS ──────────────────────────────────────────────
+function slugify(s){
+  return s.toLowerCase().trim()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+function toast(msg){
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 3000);
+}
+
+function escapeHtml(s){
+  if(s === null || s === undefined) return '';
+  return String(s).replace(/[&<>"']/g, function(c){
+    return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#039;' }[c];
+  });
+}
+</script>
+</body>
+</html>

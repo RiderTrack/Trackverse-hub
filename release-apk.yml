@@ -1,0 +1,105 @@
+# ════════════════════════════════════════════════════════════
+# WORKFLOW: Build APK + Crear Release automático
+# ════════════════════════════════════════════════════════════
+# Copia este archivo en: .github/workflows/release-apk.yml
+# de CADA repo de app (ridertrack, clientetrack, fitwallet, etc.)
+#
+# Qué hace:
+#   1. En cada push a main, construye el APK
+#   2. Crea un GitHub Release con el APK adjunto
+#   3. El catálogo (trackverse-hub) lo detecta automáticamente
+# ════════════════════════════════════════════════════════════
+
+name: Build APK + Release
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Checkout del código
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      # 2. Setup Node.js
+      - name: 📦 Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # 3. Setup Java (para Android)
+      - name: ☕ Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      # 4. Instalar Capacitor
+      - name: 📥 Install Capacitor
+        run: npm install
+
+      # 5. Agregar plataforma Android (si no existe)
+      - name: 📱 Add Android platform
+        run: npx cap add android || true
+
+      # 6. Copiar assets web
+      - name: 📋 Copy web assets
+        run: npx cap copy android
+
+      # 7. Construir APK debug
+      - name: 🔨 Build APK
+        working-directory: android
+        run: ./gradlew assembleDebug
+
+      # 8. Generar nombre de versión
+      - name: 🏷️ Generate version
+        id: version
+        run: |
+          # Lee la versión de package.json o usa timestamp
+          VERSION=$(node -p "require('./package.json').version || '1.0.0'")
+          # Limpia la versión (sin v inicial)
+          CLEAN_VERSION=$(echo "$VERSION" | sed 's/^v//')
+          # Genera tag con fecha
+          TAG="v${CLEAN_VERSION}-$(date +'%Y%m%d%H%M')"
+          # Nombre del release
+          NAME="Build $(date +'%d-%b-%Y %H:%M')"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "name=$NAME" >> $GITHUB_OUTPUT
+          echo "date=$(date +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
+
+      # 9. Crear GitHub Release con el APK
+      - name: 🚀 Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: ${{ steps.version.outputs.name }}
+          body: |
+            ## 📦 APK generado automáticamente
+
+            **Fecha:** ${{ steps.version.outputs.date }}
+            **Commit:** ${{ github.event.head_commit.message }}
+
+            ### Instalación
+            1. Descargá el archivo `.apk`
+            2. En Android, abrí el archivo
+            3. Si pide permisos de "orígenes desconocidos", aceptá
+            4. Instalá y abrí la app
+
+            ---
+            Generado por GitHub Actions · TrackVerse Hub
+          files: |
+            android/app/build/outputs/apk/debug/app-debug.apk
+          prerelease: false
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 10. Log de éxito
+      - name: ✅ Success log
+        run: |
+          echo "🎉 Release creado: ${{ steps.version.outputs.tag }}"
+          echo "📦 APK subido como asset"
+          echo "🌐 Visible en trackverse-hub automáticamente"
