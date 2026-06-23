@@ -33,7 +33,7 @@
       "repo": "RiderTrack/ridertrack.github.io",
       "descripcion": "App de gestión para motoristas de Tiendas Mate. Pedidos, chat interno, GPS, cronómetro, voz.",
       "categoria": "Productividad",
-      "visible": false,
+      "visible": true,
       "android_min": "7.0",
       "pais": "Perú"
     },
