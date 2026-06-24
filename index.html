@@ -257,6 +257,25 @@
 
         /* Changelog */
         .changelog-box { max-width: 800px; margin: 0 auto; }
+
+        /* STAR WARS CHANGELOG */
+        .sw-container { position: relative; height: 400px; overflow: hidden; background: #000; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08); perspective: 400px; cursor: pointer; }
+        .sw-container::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 60px; background: linear-gradient(to bottom, #000, transparent); z-index: 2; pointer-events: none; }
+        .sw-container::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 60px; background: linear-gradient(to top, #000, transparent); z-index: 2; pointer-events: none; }
+        .sw-content { position: absolute; top: 100%; left: 50%; transform: translateX(-50%) rotateX(25deg); transform-origin: 50% 100%; width: 90%; animation: swScroll 60s linear infinite; }
+        .sw-container.paused .sw-content { animation-play-state: paused; }
+        @keyframes swScroll { 0% { top: 100%; } 100% { top: -300%; } }
+        .sw-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 1.2rem; margin-bottom: 1rem; }
+        .sw-card-title { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; flex-wrap: wrap; }
+        .sw-card-tag { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 1rem; padding: 0.2rem 0.6rem; border-radius: 6px; }
+        .sw-card-date { font-size: 0.7rem; color: var(--text-tertiary); }
+        .sw-card-app { font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; }
+        .sw-card-section { font-size: 0.8rem; margin: 0.5rem 0 0.3rem; display: flex; align-items: center; gap: 0.3rem; }
+        .sw-card-section.new { color: var(--brand-rider); }
+        .sw-card-section.fix { color: var(--brand-admin); }
+        .sw-card-list { list-style: none; padding: 0; margin: 0 0 0.5rem 0; }
+        .sw-card-list li { color: var(--text-secondary); font-size: 0.78rem; line-height: 1.6; padding-left: 1rem; position: relative; }
+        .sw-card-list li::before { content: '▸'; position: absolute; left: 0; color: var(--text-tertiary); }
         .cl-card { background: var(--bg-surface); border: var(--border-subtle); border-radius: var(--radius-md); padding: 2rem; margin-bottom: 1.5rem; }
         .cl-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 1rem; }
         .cl-ver { font-family: 'JetBrains Mono'; font-weight: 700; font-size: 1.2rem; background: var(--bg-glass); padding: 0.3rem 0.8rem; border-radius: var(--radius-pill); }
@@ -568,7 +587,7 @@
             <div class="drawer-item" onclick="app.navigate('inicio')"><i class="fa-solid fa-house"></i> Inicio</div>
             <div class="drawer-item" onclick="app.navigate('apps')"><i class="fa-solid fa-cube"></i> Apps</div>
             <div class="drawer-item" onclick="app.navigate('reviews')"><i class="fa-solid fa-star"></i> Reseñas</div>
-            <div class="drawer-item" onclick="app.navigate('downloads')"><i class="fa-solid fa-download"></i> Descargas</div>
+            <div class="drawer-item" onclick="app.navigate('experiencia')"><i class="fa-solid fa-wand-magic-sparkles"></i> Experiencia</div>
             <div class="drawer-item" onclick="app.navigate('info')"><i class="fa-solid fa-circle-info"></i> Info & Stack</div>
             <div class="drawer-section-label">ACCESO RESTRINGIDO</div>
             <div class="drawer-item" onclick="app.navigate('catalog-auth')"><i class="fa-solid fa-lock"></i> Catálogo VIP</div>
@@ -606,7 +625,7 @@
             
             <div class="hero-actions reveal" style="transition-delay: 0.3s;">
                 <button class="btn-large primary" onclick="app.navigate('apps')"><i class="fa-solid fa-compass"></i> Explorar Ecosistema</button>
-                <button class="btn-large secondary" onclick="app.navigate('downloads')"><i class="fa-brands fa-android"></i> Descargar Apps</button>
+                <button class="btn-large secondary" onclick="app.navigate('info')"><i class="fa-brands fa-android"></i> Descargar Apps</button>
             </div>
 
             <div class="hero-shields-3d reveal" style="transition-delay: 0.4s;">
@@ -847,11 +866,11 @@
     </div> <!-- Fin View Reviews -->
 
     <!-- ==========================================================================
-         VISTA 5: DOWNLOADS (Terminal Verde)
+         VISTA 5: EXPERIENCIA (Stats + Galería + Tutoriales + Demo)
          ========================================================================== -->
-    <div id="view-downloads" class="app-view">
-        <!-- Navbar de Downloads -->
-        <div class="public-nav-wrapper" id="downloads-navbar">
+    <div id="view-experiencia" class="app-view">
+        <!-- Navbar -->
+        <div class="public-nav-wrapper" id="experiencia-navbar">
             <nav class="public-nav">
                 <button class="hamburger-btn" onclick="toggleDrawer()" aria-label="Abrir menú"><i class="fa-solid fa-bars"></i></button>
                 <div class="nav-brand">TRACKVERSE</div>
@@ -862,20 +881,101 @@
             </nav>
         </div>
 
-        <section class="terminal-section" style="min-height:100vh;padding:8rem 2rem 4rem;">
-            <div style="max-width:900px;margin:0 auto;">
-                <div style="font-size:1.5rem;color:#00FF41;margin-bottom:2rem;border-bottom:1px solid rgba(0,255,65,0.3);padding-bottom:1rem;">
-                    > trackverse://downloads<span class="term-cursor">_</span>
+        <!-- STATS EN VIVO -->
+        <section class="pub-section" style="padding-top:6rem;">
+            <div class="sec-header reveal">
+                <span class="sec-badge"><i class="fa-solid fa-chart-line"></i> Tiempo Real</span>
+                <h2 class="sec-title">Estadísticas en Vivo.</h2>
+                <p class="sec-desc">Datos actualizados desde GitHub en tiempo real.</p>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.5rem;max-width:1200px;margin:0 auto;">
+                <div class="bento-card reveal" style="padding:2rem;text-align:center;align-items:center;">
+                    <div style="font-size:3rem;font-weight:900;color:var(--brand-rider);" id="exp-stat-apps">0</div>
+                    <div style="color:var(--text-secondary);font-size:0.85rem;text-transform:uppercase;letter-spacing:1px;">📱 Apps</div>
                 </div>
-                <div id="terminal-apps-list" style="font-family:'JetBrains Mono',monospace;">
-                    <div style="text-align:center;padding:3rem;color:#00FF41;opacity:0.5;">
-                        <i class="fa-solid fa-circle-notch fa-spin" style="font-size:2rem;"></i>
-                        <p style="margin-top:1rem;">Cargando binarios...</p>
-                    </div>
+                <div class="bento-card reveal delay-1" style="padding:2rem;text-align:center;align-items:center;">
+                    <div style="font-size:3rem;font-weight:900;color:var(--brand-fit);" id="exp-stat-versions">0</div>
+                    <div style="color:var(--text-secondary);font-size:0.85rem;text-transform:uppercase;letter-spacing:1px;">📦 Versiones</div>
+                </div>
+                <div class="bento-card reveal" style="padding:2rem;text-align:center;align-items:center;">
+                    <div style="font-size:3rem;font-weight:900;color:var(--brand-health);" id="exp-stat-downloads">0</div>
+                    <div style="color:var(--text-secondary);font-size:0.85rem;text-transform:uppercase;letter-spacing:1px;">⬇️ Descargas</div>
+                </div>
+                <div class="bento-card reveal delay-1" style="padding:2rem;text-align:center;align-items:center;">
+                    <div style="font-size:3rem;font-weight:900;color:var(--brand-wallet);" id="exp-stat-reviews">0</div>
+                    <div style="color:var(--text-secondary);font-size:0.85rem;text-transform:uppercase;letter-spacing:1px;">⭐ Reseñas</div>
                 </div>
             </div>
         </section>
-    </div> <!-- Fin View Downloads -->
+
+        <!-- GALERÍA VISUAL -->
+        <section class="pub-section" style="background:rgba(10,10,12,0.8);">
+            <div class="sec-header reveal">
+                <span class="sec-badge"><i class="fa-solid fa-images"></i> Galería</span>
+                <h2 class="sec-title">Galería Visual.</h2>
+                <p class="sec-desc">Mirá cómo se ven nuestras aplicaciones.</p>
+            </div>
+            <div id="exp-gallery" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:2rem;max-width:1200px;margin:0 auto;">
+                <!-- Generado por JS -->
+            </div>
+        </section>
+
+        <!-- TUTORIALES -->
+        <section class="pub-section">
+            <div class="sec-header reveal">
+                <span class="sec-badge"><i class="fa-solid fa-graduation-cap"></i> Aprende</span>
+                <h2 class="sec-title">Tutoriales.</h2>
+                <p class="sec-desc">Aprendé a usar cada función de las apps.</p>
+            </div>
+            <div id="exp-tutorials" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(350px,1fr));gap:1.5rem;max-width:1200px;margin:0 auto;">
+                <!-- Generado por JS -->
+            </div>
+        </section>
+
+        <!-- DEMO INTERACTIVA -->
+        <section class="pub-section" style="background:rgba(10,10,12,0.8);">
+            <div class="sec-header reveal">
+                <span class="sec-badge"><i class="fa-solid fa-wand-magic-sparkles"></i> Probá</span>
+                <h2 class="sec-title">Demo Interactiva.</h2>
+                <p class="sec-desc">Probá algunas funciones sin instalar nada.</p>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:2rem;max-width:1200px;margin:0 auto;">
+                <!-- Demo: Cronómetro -->
+                <div class="bento-card reveal" style="padding:2rem;text-align:center;">
+                    <div class="bento-icon" style="margin:0 auto 1rem;color:var(--brand-rider);"><i class="fa-solid fa-stopwatch"></i></div>
+                    <h3 style="margin-bottom:1rem;">Cronómetro</h3>
+                    <div id="demo-crono" style="font-family:'JetBrains Mono';font-size:2.5rem;font-weight:700;color:var(--brand-rider);margin-bottom:1rem;">00:00:00</div>
+                    <button onclick="demoToggleCrono()" id="demo-crono-btn" style="background:var(--brand-rider);color:#fff;border:none;padding:0.6rem 1.5rem;border-radius:8px;font-weight:700;cursor:pointer;width:100%;">▶ Iniciar</button>
+                </div>
+                <!-- Demo: Estados -->
+                <div class="bento-card reveal delay-1" style="padding:2rem;text-align:center;">
+                    <div class="bento-icon" style="margin:0 auto 1rem;color:var(--brand-health);"><i class="fa-solid fa-circle-check"></i></div>
+                    <h3 style="margin-bottom:1rem;">Estados de Pedido</h3>
+                    <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:1rem;">Tocá un estado:</p>
+                    <div style="display:flex;flex-wrap:wrap;gap:0.5rem;justify-content:center;margin-bottom:1rem;">
+                        <button onclick="demoSetEstado('pendiente')" style="background:rgba(255,255,255,0.05);color:var(--text-secondary);border:1px solid rgba(255,255,255,0.1);padding:0.4rem 0.8rem;border-radius:6px;font-size:0.75rem;cursor:pointer;">⏳ Pendiente</button>
+                        <button onclick="demoSetEstado('efectivo')" style="background:rgba(34,197,94,0.15);color:#22c55e;border:1px solid rgba(34,197,94,0.3);padding:0.4rem 0.8rem;border-radius:6px;font-size:0.75rem;cursor:pointer;">💵 Efectivo</button>
+                        <button onclick="demoSetEstado('fallida')" style="background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.3);padding:0.4rem 0.8rem;border-radius:6px;font-size:0.75rem;cursor:pointer;">❌ Fallida</button>
+                        <button onclick="demoSetEstado('reprogramar')" style="background:rgba(245,158,11,0.15);color:#f59e0b;border:1px solid rgba(245,158,11,0.3);padding:0.4rem 0.8rem;border-radius:6px;font-size:0.75rem;cursor:pointer;">🔄 Reprogramar</button>
+                    </div>
+                    <div id="demo-estado-result" style="padding:1rem;border-radius:8px;background:rgba(255,255,255,0.03);font-size:0.9rem;">Seleccioná un estado ↑</div>
+                </div>
+                <!-- Demo: Estrellas -->
+                <div class="bento-card reveal" style="padding:2rem;text-align:center;">
+                    <div class="bento-icon" style="margin:0 auto 1rem;color:#fbbf24;"><i class="fa-solid fa-star"></i></div>
+                    <h3 style="margin-bottom:1rem;">Calificación</h3>
+                    <div id="demo-stars" style="font-size:2.5rem;cursor:pointer;letter-spacing:0.3rem;margin-bottom:1rem;">
+                        <span onclick="demoSetStars(1)" style="color:rgba(255,255,255,0.2);">★</span>
+                        <span onclick="demoSetStars(2)" style="color:rgba(255,255,255,0.2);">★</span>
+                        <span onclick="demoSetStars(3)" style="color:rgba(255,255,255,0.2);">★</span>
+                        <span onclick="demoSetStars(4)" style="color:rgba(255,255,255,0.2);">★</span>
+                        <span onclick="demoSetStars(5)" style="color:rgba(255,255,255,0.2);">★</span>
+                    </div>
+                    <div id="demo-stars-result" style="color:var(--text-secondary);font-size:0.9rem;">Tocá una estrella</div>
+                </div>
+            </div>
+        </section>
+    </div> <!-- Fin View Experiencia -->
 
     <!-- ==========================================================================
          VISTA 6: SECCIONES ADICIONALES (Changelog + Tech + Galería + Footer)
@@ -913,23 +1013,11 @@
             <div class="bento-grid" style="max-width: 1200px;">
                 
                 <div class="bento-card bento-half reveal" style="padding: 2rem;">
-                    <h3 class="bento-title" style="font-size:1.5rem; margin-bottom: 2rem;"><i class="fa-solid fa-code-commit"></i> Changelog Global</h3>
-                    <div class="changelog-box">
-                        <div class="cl-card">
-                            <div class="cl-head"><span class="cl-ver">v5.2.0</span><span class="cl-date">Hace 2 días</span></div>
-                            <div class="cl-list">
-                                <h4 class="new"><i class="fa-solid fa-star"></i> Novedades</h4>
-                                <ul><li>Integración de Gemini Flash para ChefIA.</li><li>Nuevo motor de renderizado de gráficos en WalletTrack.</li></ul>
-                                <h4 class="fix"><i class="fa-solid fa-wrench"></i> Correcciones</h4>
-                                <ul><li>Fix: Fuga de memoria en el listener de Firebase (RiderTrack).</li></ul>
-                            </div>
-                        </div>
-                        <div class="cl-card">
-                            <div class="cl-head"><span class="cl-ver">v5.1.5</span><span class="cl-date">Hace 2 semanas</span></div>
-                            <div class="cl-list">
-                                <h4 class="new"><i class="fa-solid fa-star"></i> Novedades</h4>
-                                <ul><li>Soporte nativo para Android 14.</li></ul>
-                            </div>
+                    <h3 class="bento-title" style="font-size:1.5rem; margin-bottom: 1rem;"><i class="fa-solid fa-code-commit"></i> Changelog Global</h3>
+                    <p style="color:var(--text-tertiary);font-size:0.7rem;margin-bottom:0.8rem;text-align:center;">Tocá para pausar/reanudar</p>
+                    <div class="sw-container" id="info-sw-container" onclick="this.classList.toggle('paused')">
+                        <div class="sw-content" id="info-sw-content">
+                            <div style="text-align:center;color:var(--text-tertiary);font-size:0.85rem;padding:2rem;">Cargando...</div>
                         </div>
                     </div>
                 </div>
@@ -1228,29 +1316,71 @@
                 <!-- TAB 4: LOGS / CHANGELOG -->
                 <div id="tab-logs" class="admin-tab-content">
                     <div class="dash-panel">
-                        <div class="dash-panel-head"><div class="dash-panel-title">Publicar Actualización</div></div>
-                        <form onsubmit="event.preventDefault(); alert('Changelog guardado');" class="admin-form-grid">
-                            <div><label class="admin-label">Versión</label><input type="text" class="admin-input" placeholder="ej. v5.3.0"></div>
-                            <div><label class="admin-label">Fecha</label><input type="date" class="admin-input"></div>
-                            <div style="grid-column: span 2;"><label class="admin-label">Novedades (Markdown soportado)</label><textarea class="admin-input" rows="4" placeholder="- Nueva función X..."></textarea></div>
-                            <div style="grid-column: span 2;"><button type="submit" class="admin-submit">Publicar en Web Pública</button></div>
-                        </form>
+                        <div class="dash-panel-head">
+                            <div class="dash-panel-title">📝 Editor de Changelogs</div>
+                            <div style="display:flex;gap:0.5rem;align-items:center;">
+                                <select id="changelog-app-select" onchange="cargarChangelogs()" style="background:var(--bg-elevated);color:#fff;border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:0.5rem 1rem;font-family:inherit;">
+                                    <option value="">Seleccionar app...</option>
+                                </select>
+                                <button onclick="abrirModalNuevoChangelog()" class="btn-action" style="background:var(--brand-health);"><i class="fa-solid fa-plus"></i> Nueva</button>
+                            </div>
+                        </div>
+                        <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:1.5rem;">Seleccioná una app para ver, editar, borrar o crear notas de versión.</p>
+                        <div id="changelog-list" style="display:flex;flex-direction:column;gap:1rem;">
+                            <div style="text-align:center;padding:2rem;color:var(--text-secondary);">Seleccioná una app arriba.</div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- TAB 5: SETTINGS -->
                 <div id="tab-settings" class="admin-tab-content">
                     <div class="dash-panel">
-                        <div class="dash-panel-head"><div class="dash-panel-title">Seguridad de la Plataforma</div></div>
-                        <form onsubmit="event.preventDefault(); alert('Claves actualizadas');" class="admin-form-grid">
-                            <div><label class="admin-label">Nueva Clave Catálogo Privado</label><input type="password" class="admin-input" placeholder="********"></div>
-                            <div><label class="admin-label">Nueva Clave Administrador</label><input type="password" class="admin-input" placeholder="********"></div>
-                            <div style="grid-column: span 2;"><button type="submit" class="admin-submit">Actualizar Credenciales</button></div>
+                        <div class="dash-panel-head"><div class="dash-panel-title">🔐 Password de Acceso</div></div>
+                        <form onsubmit="event.preventDefault(); guardarPasswords();" class="admin-form-grid">
+                            <div style="grid-column: span 2;"><label class="admin-label">Nuevo Password (catálogo + admin)</label><input type="password" id="set-pwd-catalog" class="admin-input" placeholder="Nuevo password"></div>
+                            <div style="grid-column: span 2;"><button type="submit" class="admin-submit">Actualizar Password</button></div>
                         </form>
+                    </div>
+                    <div class="dash-panel" style="margin-top:1.5rem;">
+                        <div class="dash-panel-head"><div class="dash-panel-title">🔑 Token de GitHub</div></div>
+                        <form onsubmit="event.preventDefault(); guardarToken();" class="admin-form-grid">
+                            <div style="grid-column: span 2;"><label class="admin-label">Personal Access Token (ghp_...)</label><input type="password" id="set-github-token" class="admin-input" placeholder="ghp_xxxxxxxxxxxx"></div>
+                            <div style="grid-column: span 2;"><button type="submit" class="admin-submit">Guardar Token</button></div>
+                        </form>
+                        <p style="color:var(--text-tertiary);font-size:0.75rem;padding:10px 0">Necesario para editar apps y changelogs. Crealo en github.com/settings/tokens con permiso "repo".</p>
                     </div>
                 </div>
 
             </div> <!-- End Scroll -->
+        </div>
+    </div>
+
+    <!-- MODAL: NUEVO CHANGELOG -->
+    <div id="form-changelog-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);z-index:9600;align-items:center;justify-content:center;padding:20px">
+        <div style="background:var(--bg-elevated);border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:28px 24px;max-width:500px;width:100%;max-height:90vh;overflow-y:auto">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+                <h3 style="font-size:1.3rem">✍️ Nueva Actualización</h3>
+                <button onclick="cerrarModalNuevoChangelog()" style="background:rgba(255,255,255,0.08);border:none;color:#fff;width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:1rem">✕</button>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:1rem;">
+                <div>
+                    <label class="admin-label">App</label>
+                    <select id="new-cl-app" style="width:100%;background:var(--bg-base);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;padding:0.6rem 1rem;font-family:inherit;"></select>
+                </div>
+                <div>
+                    <label class="admin-label">Título de la versión</label>
+                    <input type="text" id="new-cl-title" class="admin-input" placeholder="ej. v5.6 - Actualización de Chat">
+                </div>
+                <div>
+                    <label class="admin-label">Tag (versión corta)</label>
+                    <input type="text" id="new-cl-tag" class="admin-input" placeholder="ej. v5.6">
+                </div>
+                <div>
+                    <label class="admin-label">Notas de actualización</label>
+                    <textarea id="new-cl-body" class="admin-input" rows="6" placeholder="- Nuevo botón de finalizar ruta con confeti&#10;- Fix del odómetro GPS&#10;- Mejora en las estadísticas" style="resize:vertical;"></textarea>
+                </div>
+                <button onclick="crearNuevoChangelog()" class="admin-submit">🚀 Publicar Actualización</button>
+            </div>
         </div>
     </div>
 
@@ -1287,14 +1417,14 @@
                 el.style.display = 'block';
                 setTimeout(() => el.classList.add('active'), 50);
 
-                if(['inicio','apps','reviews','downloads','info'].indexOf(viewId) !== -1){
+                if(['inicio','apps','reviews','experiencia','info'].indexOf(viewId) !== -1){
                     app.initScrollReveal();
                 }
                 if(viewId === 'reviews') renderReviews();
-                if(viewId === 'downloads') renderDownloads();
-                if(viewId === 'info') renderInfoDownloads();
+                if(viewId === 'experiencia') renderExperiencia();
+                if(viewId === 'info') { renderInfoDownloads(); renderInfoChangelog(); }
                 if(viewId === 'private-catalog') renderPrivateCatalog();
-                if(viewId === 'admin-dashboard'){ app.renderAdminApps(); app.renderChart(); }
+                if(viewId === 'admin-dashboard'){ app.renderAdminApps(); app.renderChart(); cargarChangelogSelect(); }
             },
 
             login: function(e, type) {
@@ -1663,6 +1793,57 @@
         function formatSize(b){ if(!b) return '—'; if(b<1024) return b+' B'; if(b<1048576) return (b/1024).toFixed(1)+' KB'; return (b/1048576).toFixed(1)+' MB'; }
         function timeAgo(ts){ if(!ts) return '—'; var d=Date.now()-ts; if(d<3600000) return 'hace '+Math.floor(d/60000)+' min'; if(d<86400000) return 'hace '+Math.floor(d/3600000)+' h'; if(d<604800000) return 'hace '+Math.floor(d/86400000)+' d'; return new Date(ts).toLocaleDateString('es-PE',{day:'2-digit',month:'short'}); }
 
+        // ─── CHANGELOG STAR WARS ─────────────────────────────────
+        function renderInfoChangelog() {
+            var box = document.getElementById('info-sw-content');
+            if(!box) return;
+            if(HUB_APPS.length === 0){ return; }
+            var allReleases = [];
+            HUB_APPS.forEach(function(a) {
+                var rels = HUB_RELEASES_CACHE[a.id] || [];
+                rels.forEach(function(r) { allReleases.push({ app: a, rel: r, date: new Date(r.date).getTime() }); });
+            });
+            allReleases.sort(function(a, b) { return b.date - a.date; });
+            var mostrados = allReleases.slice(0, 12);
+            if(mostrados.length === 0) {
+                box.innerHTML = '<div style="text-align:center;color:var(--text-tertiary);padding:3rem;">Aún no hay versiones publicadas.</div>';
+                return;
+            }
+            var html = '<div style="text-align:center;margin-bottom:2rem;"><div style="font-size:1.5rem;font-weight:800;color:#fff;letter-spacing:0.1em;">TRACKVERSE</div><div style="font-size:0.8rem;color:var(--text-tertiary);margin-top:0.3rem;">CHANGELOG GLOBAL</div></div>';
+            mostrados.forEach(function(item) {
+                var a = item.app, r = item.rel;
+                var dateTxt = new Date(r.date).toLocaleDateString('es-PE', { day:'2-digit', month:'short', year:'numeric' });
+                var lines = (r.notes || 'Sin notas.').split('\n').filter(function(l){ return l.trim(); });
+                var novedades = [], correcciones = [], otras = [];
+                lines.forEach(function(line) {
+                    var l = line.trim().replace(/^[-*•]\s*/, '');
+                    if(!l) return;
+                    var lower = l.toLowerCase();
+                    if(lower.indexOf('fix') !== -1 || lower.indexOf('correcci') !== -1 || lower.indexOf('error') !== -1 || lower.indexOf('bug') !== -1 || lower.indexOf('✅') !== -1) {
+                        correcciones.push(l);
+                    } else {
+                        novedades.push(l);
+                    }
+                });
+                html += '<div class="sw-card">';
+                html += '<div class="sw-card-title"><span class="sw-card-tag" style="background:' + a.color + '22;color:' + a.color + ';">' + escapeHtml(r.tag) + '</span><span class="sw-card-app">' + escapeHtml(a.nombre) + '</span><span class="sw-card-date">' + dateTxt + '</span></div>';
+                if(novedades.length > 0) {
+                    html += '<div class="sw-card-section new">⭐ Novedades</div><ul class="sw-card-list">';
+                    novedades.forEach(function(n) { html += '<li>' + escapeHtml(n) + '</li>'; });
+                    html += '</ul>';
+                }
+                if(correcciones.length > 0) {
+                    html += '<div class="sw-card-section fix">🔧 Correcciones</div><ul class="sw-card-list">';
+                    correcciones.forEach(function(c) { html += '<li>' + escapeHtml(c) + '</li>'; });
+                    html += '</ul>';
+                }
+                html += '</div>';
+            });
+            box.innerHTML = html;
+            var dur = Math.max(30, mostrados.length * 8);
+            box.style.animation = 'swScroll ' + dur + 's linear infinite';
+        }
+
         // ─── INFO & STACK DOWNLOADS (dinámico desde GitHub) ───
         function renderInfoDownloads() {
             var grid = document.getElementById('info-dl-grid');
@@ -1693,6 +1874,273 @@
             });
             grid.innerHTML = html;
             app.initScrollReveal();
+        }
+
+        // ─── CHANGELOG EDITOR ────────────────────────────────────
+        function cargarChangelogSelect() {
+            var sel = document.getElementById('changelog-app-select');
+            if(!sel) return;
+            var html = '<option value="">Seleccionar app...</option>';
+            HUB_APPS.forEach(function(a){
+                html += '<option value="' + a.id + '">' + a.nombre + '</option>';
+            });
+            sel.innerHTML = html;
+        }
+        function cargarChangelogs() {
+            var appId = document.getElementById('changelog-app-select').value;
+            var cont = document.getElementById('changelog-list');
+            if(!cont) return;
+            if(!appId){ cont.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-secondary)">Seleccioná una app arriba.</div>'; return; }
+            var appData = HUB_APPS.filter(function(a){ return a.id === appId; })[0];
+            var rels = HUB_RELEASES_CACHE[appId] || [];
+            if(rels.length === 0){
+                cont.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-secondary)">Esta app no tiene versiones. Creá una con el botón "Nueva".</div>';
+                return;
+            }
+            var html = '';
+            rels.forEach(function(r, idx){
+                var dateTxt = new Date(r.date).toLocaleDateString('es-PE',{day:'2-digit',month:'short',year:'numeric'});
+                var hasApk = r.size > 0;
+                html += '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:1.2rem;' + (idx === 0 ? 'border-color:' + (appData ? appData.color : '#fff') + '33;' : '') + '">' +
+                    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem">' +
+                      '<div style="display:flex;align-items:center;gap:0.5rem">' +
+                        '<strong style="color:' + (appData ? appData.color : '#fff') + '">' + escapeHtml(r.tag) + '</strong>' +
+                        (idx === 0 ? '<span style="background:' + (appData ? appData.color : '#0ea5e9') + ';color:#fff;font-size:0.6rem;padding:2px 6px;border-radius:4px;font-weight:800;">ÚLTIMA</span>' : '') +
+                        (hasApk ? '<span style="background:rgba(34,197,94,0.15);color:#22c55e;font-size:0.6rem;padding:2px 6px;border-radius:4px;">📦 APK</span>' : '<span style="background:rgba(245,158,11,0.15);color:#f59e0b;font-size:0.6rem;padding:2px 6px;border-radius:4px;">📝 Solo notas</span>') +
+                      '</div>' +
+                      '<span style="font-size:0.7rem;color:var(--text-tertiary)">' + dateTxt + '</span>' +
+                    '</div>' +
+                    '<textarea id="changelog-text-' + r.id + '" style="width:100%;min-height:80px;background:var(--bg-base);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;padding:0.8rem;font-family:inherit;font-size:0.85rem;resize:vertical;margin-bottom:0.5rem;" placeholder="Escribí las notas de versión...">' + escapeHtml(r.notes || '') + '</textarea>' +
+                    '<div style="display:flex;gap:0.5rem;">' +
+                      '<button onclick="guardarChangelog(' + r.id + ',\'' + appId + '\')" style="background:' + (appData ? appData.color : '#0ea5e9') + ';color:#fff;border:none;padding:0.5rem 1.2rem;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.8rem;flex:1;">💾 Guardar</button>' +
+                      '<button onclick="borrarChangelog(' + r.id + ',\'' + appId + '\',\'' + escapeHtml(r.tag) + '\')" style="background:rgba(239,68,68,0.15);color:#f87171;border:1px solid rgba(239,68,68,0.3);padding:0.5rem 1.2rem;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.8rem;">🗑️ Borrar</button>' +
+                    '</div>' +
+                '</div>';
+            });
+            cont.innerHTML = html;
+        }
+        function guardarChangelog(releaseId, appId) {
+            var token = localStorage.getItem('hub-github-token');
+            if(!token){ alert('Configurá el token de GitHub en Configuración.'); return; }
+            var appData = HUB_APPS.filter(function(a){ return a.id === appId; })[0];
+            if(!appData) return;
+            var texto = document.getElementById('changelog-text-' + releaseId).value;
+            var url = 'https://api.github.com/repos/' + appData.repo + '/releases/' + releaseId;
+            var btn = event.target;
+            var origText = btn.innerHTML;
+            btn.innerHTML = '⏳ Guardando...';
+            btn.disabled = true;
+            fetch(url, {
+                method: 'PATCH',
+                headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' },
+                body: JSON.stringify({ body: texto })
+            })
+            .then(function(r){ if(!r.ok) throw new Error('Error'); return r.json(); })
+            .then(function(){
+                var rels = HUB_RELEASES_CACHE[appId] || [];
+                rels.forEach(function(r){ if(r.id === releaseId) r.notes = texto; });
+                btn.innerHTML = '✅ Guardado';
+                setTimeout(function(){ btn.innerHTML = origText; btn.disabled = false; }, 1500);
+            })
+            .catch(function(err){
+                btn.innerHTML = '❌ Error';
+                setTimeout(function(){ btn.innerHTML = origText; btn.disabled = false; }, 1500);
+                alert('Error: ' + err.message);
+            });
+        }
+        function borrarChangelog(releaseId, appId, tag) {
+            var token = localStorage.getItem('hub-github-token');
+            if(!token){ alert('Configurá el token de GitHub en Configuración.'); return; }
+            var appData = HUB_APPS.filter(function(a){ return a.id === appId; })[0];
+            if(!appData) return;
+            if(!confirm('¿Borrar la versión "' + tag + '"?\nNo se puede deshacer.')) return;
+            var url = 'https://api.github.com/repos/' + appData.repo + '/releases/' + releaseId;
+            fetch(url, {
+                method: 'DELETE',
+                headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github+json' }
+            })
+            .then(function(r){ if(!r.ok && r.status !== 204) throw new Error('Error'); })
+            .then(function(){
+                var tagUrl = 'https://api.github.com/repos/' + appData.repo + '/git/refs/tags/' + encodeURIComponent(tag);
+                fetch(tagUrl, { method: 'DELETE', headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github+json' } }).catch(function(){});
+                var rels = HUB_RELEASES_CACHE[appId] || [];
+                HUB_RELEASES_CACHE[appId] = rels.filter(function(r){ return r.id !== releaseId; });
+                alert('✅ Versión borrada.');
+                cargarChangelogs();
+            })
+            .catch(function(err){ alert('Error: ' + err.message); });
+        }
+        function abrirModalNuevoChangelog() {
+            var sel = document.getElementById('new-cl-app');
+            var html = '';
+            HUB_APPS.forEach(function(a){ html += '<option value="' + a.id + '">' + a.nombre + '</option>'; });
+            sel.innerHTML = html;
+            document.getElementById('new-cl-title').value = '';
+            document.getElementById('new-cl-tag').value = '';
+            document.getElementById('new-cl-body').value = '';
+            document.getElementById('form-changelog-modal').style.display = 'flex';
+        }
+        function cerrarModalNuevoChangelog() {
+            document.getElementById('form-changelog-modal').style.display = 'none';
+        }
+        function crearNuevoChangelog() {
+            var token = localStorage.getItem('hub-github-token');
+            if(!token){ alert('Configurá el token de GitHub en Configuración.'); return; }
+            var appId = document.getElementById('new-cl-app').value;
+            var title = document.getElementById('new-cl-title').value.trim();
+            var tag = document.getElementById('new-cl-tag').value.trim();
+            var body = document.getElementById('new-cl-body').value.trim();
+            if(!appId || !tag){ alert('Falta app o tag'); return; }
+            var appData = HUB_APPS.filter(function(a){ return a.id === appId; })[0];
+            if(!appData) return;
+            var btn = event.target;
+            var origText = btn.innerHTML;
+            btn.innerHTML = '⏳ Publicando...';
+            btn.disabled = true;
+            fetch('https://api.github.com/repos/' + appData.repo + '/releases', {
+                method: 'POST',
+                headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tag_name: tag, name: title || tag, body: body || 'Sin notas.', draft: false, prerelease: false, make_latest: 'true' })
+            })
+            .then(function(r){ if(!r.ok) throw new Error('Error'); return r.json(); })
+            .then(function(data){
+                var newRel = { id: data.id, tag: data.tag_name, name: data.name || data.tag_name, date: data.published_at, size: 0, url: '', downloads: 0, notes: data.body || '' };
+                if(!HUB_RELEASES_CACHE[appId]) HUB_RELEASES_CACHE[appId] = [];
+                HUB_RELEASES_CACHE[appId].unshift(newRel);
+                btn.innerHTML = '✅ Publicado';
+                setTimeout(function(){
+                    cerrarModalNuevoChangelog();
+                    document.getElementById('changelog-app-select').value = appId;
+                    cargarChangelogs();
+                    btn.innerHTML = origText;
+                    btn.disabled = false;
+                }, 1000);
+            })
+            .catch(function(err){
+                btn.innerHTML = '❌ Error';
+                setTimeout(function(){ btn.innerHTML = origText; btn.disabled = false; }, 1500);
+                alert('Error: ' + err.message + '\n¿El tag "' + tag + '" ya existe?');
+            });
+        }
+
+        // ─── EXPERIENCIA (Stats + Galería + Tutoriales + Demo) ───
+        var _demoCronoInterval = null;
+        var _demoCronoSecs = 0;
+        function renderExperiencia() {
+            if(HUB_APPS.length === 0){ return; }
+            // Stats
+            var totalApps = HUB_APPS.length;
+            var totalVersions = 0;
+            var totalDownloads = 0;
+            HUB_APPS.forEach(function(a) {
+                var rels = HUB_RELEASES_CACHE[a.id] || [];
+                totalVersions += rels.length;
+                rels.forEach(function(r) { totalDownloads += r.downloads || 0; });
+            });
+            var reviews = JSON.parse(localStorage.getItem('trackverse-reviews') || '[]');
+            var elApps = document.getElementById('exp-stat-apps');
+            var elVer = document.getElementById('exp-stat-versions');
+            var elDl = document.getElementById('exp-stat-downloads');
+            var elRev = document.getElementById('exp-stat-reviews');
+            if(elApps) elApps.textContent = totalApps;
+            if(elVer) elVer.textContent = totalVersions;
+            if(elDl) elDl.textContent = formatNum(totalDownloads);
+            if(elRev) elRev.textContent = reviews.length;
+
+            // Galería
+            var gallery = document.getElementById('exp-gallery');
+            if(gallery) {
+                var gHtml = '';
+                HUB_APPS.forEach(function(a, idx) {
+                    var delay = idx % 2 === 0 ? '' : ' delay-1';
+                    gHtml += '<div class="bento-card reveal' + delay + '" style="padding:0;overflow:hidden;">';
+                    gHtml += '<div style="background:linear-gradient(135deg,' + a.color + '22,' + a.color + '05);padding:2rem;text-align:center;">';
+                    gHtml += '<div style="font-size:3rem;margin-bottom:0.5rem;"><i class="' + (a.faIcon||'fa-solid fa-cube') + '" style="color:' + a.color + ';"></i></div>';
+                    gHtml += '<h3 style="color:' + a.color + ';">' + escapeHtml(a.nombre) + '</h3>';
+                    gHtml += '<p style="color:var(--text-secondary);font-size:0.85rem;">' + escapeHtml(a.descripcion) + '</p>';
+                    gHtml += '</div>';
+                    gHtml += '<div style="background:var(--bg-base);padding:1.5rem;display:flex;justify-content:center;">';
+                    gHtml += '<div style="width:180px;height:320px;background:var(--bg-surface);border-radius:24px;border:3px solid ' + a.color + '33;overflow:hidden;position:relative;">';
+                    gHtml += '<div style="background:' + a.color + ';height:60px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:0.8rem;">' + escapeHtml(a.nombre) + '</div>';
+                    gHtml += '<div style="padding:1rem;display:flex;flex-direction:column;gap:0.5rem;">';
+                    gHtml += '<div style="height:30px;background:' + a.color + '22;border-radius:6px;"></div>';
+                    gHtml += '<div style="height:20px;background:rgba(255,255,255,0.05);border-radius:4px;width:80%;"></div>';
+                    gHtml += '<div style="height:20px;background:rgba(255,255,255,0.05);border-radius:4px;width:60%;"></div>';
+                    gHtml += '<div style="height:40px;background:' + a.color + '11;border-radius:8px;margin-top:0.5rem;"></div>';
+                    gHtml += '<div style="height:20px;background:rgba(255,255,255,0.05);border-radius:4px;width:70%;"></div>';
+                    gHtml += '<div style="height:20px;background:rgba(255,255,255,0.05);border-radius:4px;width:50%;"></div>';
+                    gHtml += '</div></div></div></div>';
+                });
+                gallery.innerHTML = gHtml;
+            }
+
+            // Tutoriales
+            var tutorials = document.getElementById('exp-tutorials');
+            if(tutorials) {
+                var tuts = [
+                    { app: 'RiderTrack', icon: 'fa-solid fa-motorcycle', color: '#0ea5e9', title: 'Importar Excel', steps: ['Abrí RiderTrack', 'Tocá "Importar" en la topbar', 'Seleccioná tu archivo .xlsx', 'Los clientes aparecen automáticamente'] },
+                    { app: 'RiderTrack', icon: 'fa-solid fa-motorcycle', color: '#0ea5e9', title: 'Marcar entregado', steps: ['Tocá el cliente', 'Elegí el tipo de pago', 'Confirmá el monto', 'El cliente se marca como entregado'] },
+                    { app: 'RiderTrack', icon: 'fa-solid fa-motorcycle', color: '#0ea5e9', title: 'Usar el chat interno', steps: ['Tocá 💬 en la topbar', 'Ingresá el código de invitación', 'Elegí tu nombre y foto', 'Ya podés chatear con tu equipo'] },
+                    { app: 'RiderTrack', icon: 'fa-solid fa-motorcycle', color: '#0ea5e9', title: 'Finalizar ruta', steps: ['Al terminar tu día', 'Tocá "🏁 FINALIZAR RUTA"', 'Mirá el confeti 🎉', 'Revisá tus estadísticas'] },
+                    { app: 'RiderTrack', icon: 'fa-solid fa-motorcycle', color: '#0ea5e9', title: 'Descargar Excel', steps: ['Tocá "💾 GUARDAR Y CERRAR RUTA"', 'El Excel se descarga con todo', 'Incluye OBSERVACIONES y MOTIVO', 'Vuelto de empresa al final'] },
+                    { app: 'General', icon: 'fa-solid fa-wand-magic-sparkles', color: '#8b5cf6', title: 'Spotify integrado', steps: ['Tocá 🎵 en la topbar', 'Conectá tu cuenta de Spotify', 'Elegí una canción', 'La música sigue al cerrar el modal'] }
+                ];
+                var tHtml = '';
+                tuts.forEach(function(t, idx) {
+                    var delay = idx % 2 === 0 ? '' : ' delay-1';
+                    tHtml += '<div class="bento-card reveal' + delay + '" style="padding:1.5rem;cursor:pointer;" onclick="this.querySelector(\'.tut-steps\').style.display = this.querySelector(\'.tut-steps\').style.display === \'none\' ? \'block\' : \'none\';">';
+                    tHtml += '<div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:0.5rem;">';
+                    tHtml += '<div style="width:36px;height:36px;border-radius:8px;background:' + t.color + '22;display:flex;align-items:center;justify-content:center;"><i class="' + t.icon + '" style="color:' + t.color + ';"></i></div>';
+                    tHtml += '<div><strong style="font-size:0.95rem;">' + escapeHtml(t.title) + '</strong><br><span style="font-size:0.7rem;color:var(--text-tertiary);">' + escapeHtml(t.app) + '</span></div>';
+                    tHtml += '<i class="fa-solid fa-chevron-down" style="margin-left:auto;color:var(--text-tertiary);"></i>';
+                    tHtml += '</div>';
+                    tHtml += '<div class="tut-steps" style="display:none;padding-top:0.5rem;">';
+                    tHtml += '<ol style="padding-left:1.2rem;color:var(--text-secondary);font-size:0.85rem;line-height:1.8;">';
+                    t.steps.forEach(function(s) { tHtml += '<li>' + escapeHtml(s) + '</li>'; });
+                    tHtml += '</ol></div></div>';
+                });
+                tutorials.innerHTML = tHtml;
+            }
+            app.initScrollReveal();
+        }
+        function demoToggleCrono() {
+            var btn = document.getElementById('demo-crono-btn');
+            var display = document.getElementById('demo-crono');
+            if(_demoCronoInterval) {
+                clearInterval(_demoCronoInterval);
+                _demoCronoInterval = null;
+                btn.textContent = '▶ Iniciar';
+                btn.style.background = 'var(--brand-rider)';
+            } else {
+                btn.textContent = '⏸ Pausar';
+                btn.style.background = '#f59e0b';
+                _demoCronoInterval = setInterval(function() {
+                    _demoCronoSecs++;
+                    var h = Math.floor(_demoCronoSecs / 3600);
+                    var m = Math.floor((_demoCronoSecs % 3600) / 60);
+                    var s = _demoCronoSecs % 60;
+                    if(display) display.textContent = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+                }, 1000);
+            }
+        }
+        function demoSetEstado(estado) {
+            var result = document.getElementById('demo-estado-result');
+            if(!result) return;
+            var config = {
+                pendiente: { label: '⏳ Pendiente', color: '#94a3b8', desc: 'El cliente todavía no fue visitado' },
+                efectivo: { label: '💵 Efectivo', color: '#22c55e', desc: 'Pago recibido en efectivo ✅' },
+                fallida: { label: '❌ Fallida', color: '#ef4444', desc: 'No se pudo entregar el pedido' },
+                reprogramar: { label: '🔄 Reprogramar', color: '#f59e0b', desc: 'El cliente pidió reprogramar' }
+            };
+            var c = config[estado] || config.pendiente;
+            result.innerHTML = '<div style="color:' + c.color + ';font-weight:700;">' + c.label + '</div><div style="color:var(--text-secondary);font-size:0.8rem;margin-top:0.3rem;">' + c.desc + '</div>';
+        }
+        function demoSetStars(val) {
+            var stars = document.querySelectorAll('#demo-stars span');
+            var result = document.getElementById('demo-stars-result');
+            var labels = ['😥 Muy malo', '😕 Regular', '😐 Normal', '😊 Bueno', '🤩 Excelente'];
+            stars.forEach(function(s, i) { s.style.color = i < val ? '#fbbf24' : 'rgba(255,255,255,0.2)'; });
+            if(result) result.textContent = labels[val - 1] || '';
         }
 
         function simularAPK(btn) {
