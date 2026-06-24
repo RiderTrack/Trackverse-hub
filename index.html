@@ -1,0 +1,1808 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TrackVerse Enterprise | OS para la Vida</title>
+    <meta name="description" content="Plataforma corporativa TrackVerse: Productividad, Salud, Entrenamiento y Finanzas.">
+    
+    <!-- Fuentes Premium -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* ==========================================================================
+           1. CORE SYSTEM & VARIABLES (Enterprise Scale)
+           ========================================================================== */
+        :root {
+            /* Colores Base OLED */
+            --bg-base: #000000;
+            --bg-surface: #0a0a0c;
+            --bg-elevated: #121217;
+            --bg-glass: rgba(15, 15, 20, 0.5);
+            --bg-glass-heavy: rgba(10, 10, 15, 0.85);
+            
+            /* Textos */
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1aa;
+            --text-tertiary: #52525b;
+            
+            /* Identidad de Ecosistema */
+            --brand-main: #ffffff;
+            --brand-rider: #0ea5e9;  
+            --brand-fit: #8b5cf6;    
+            --brand-health: #10b981; 
+            --brand-wallet: #f59e0b; 
+            --brand-ai: #ec4899;
+            --brand-admin: #ef4444; /* Rojo para Admin */
+            
+            /* Geometría */
+            --radius-sm: 8px;
+            --radius-md: 16px;
+            --radius-lg: 24px;
+            --radius-xl: 32px;
+            --radius-pill: 99px;
+            
+            /* Físicas y Transiciones */
+            --spring-soft: cubic-bezier(0.25, 1, 0.5, 1);
+            --spring-bouncy: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+            
+            /* Efectos Material / Glass */
+            --glass-border: inset 0 1px 1px rgba(255, 255, 255, 0.15), inset 0 -1px 1px rgba(255, 255, 255, 0.05);
+            --border-subtle: 1px solid rgba(255, 255, 255, 0.08);
+            --shadow-glass: 0 30px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            --shadow-glow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+        html { scroll-behavior: smooth; background: var(--bg-base); font-size: 16px; overflow-x: hidden; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-base); color: var(--text-primary); overflow-x: hidden; line-height: 1.6; }
+        h1, h2, h3, h4, h5, h6 { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; }
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+        button { font-family: inherit; cursor: pointer; border: none; background: none; }
+        input, textarea { font-family: inherit; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-base); }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+        /* Efectos Globales */
+        .noise-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none; z-index: 9999; opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        }
+        #particle-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; opacity: 0.4; }
+
+        /* ==========================================================================
+           2. VIEW ROUTER (SPA Structure)
+           ========================================================================== */
+        .app-view {
+            display: none; opacity: 0; 
+            transition: opacity 0.6s var(--ease-out-expo);
+            position: absolute; top: 0; left: 0; width: 100%; min-height: 100vh;
+            z-index: 10;
+        }
+        .app-view.active {
+            display: block; opacity: 1; position: relative; z-index: 20;
+        }
+
+        /* ==========================================================================
+           3. SPLASH SCREEN (Evolución)
+           ========================================================================== */
+        #view-splash {
+            background: var(--bg-base); z-index: 10000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .splash-narrative {
+            height: 80px; position: relative; width: 100%;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .splash-word {
+            position: absolute; font-family: 'Plus Jakarta Sans'; font-size: clamp(2rem, 5vw, 4rem);
+            font-weight: 800; color: var(--text-secondary);
+            opacity: 0; transform: translateY(30px); transition: all 0.4s var(--spring-bouncy);
+        }
+        .splash-word.active { opacity: 1; transform: translateY(0); color: #fff; }
+        .splash-word.exit { opacity: 0; transform: translateY(-30px); }
+        .splash-final {
+            background: linear-gradient(180deg, #fff, #666);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: clamp(3rem, 7vw, 5.5rem);
+        }
+        .splash-shields {
+            display: flex; gap: 1.5rem; margin-top: 2rem; opacity: 0; transform: scale(0.8);
+            transition: all 0.8s var(--spring-bouncy);
+        }
+        .splash-shields.show { opacity: 1; transform: scale(1); }
+        .spl-shield { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
+        .splash-bar-container { width: 250px; height: 2px; background: rgba(255,255,255,0.1); margin-top: 3rem; border-radius: 2px; overflow: hidden; }
+        .splash-bar-fill { height: 100%; width: 0%; background: #fff; transition: width 0.3s ease; }
+
+        /* ==========================================================================
+           4. PUBLIC PORTAL (Website)
+           ========================================================================== */
+        /* Navbar */
+        .public-nav-wrapper {
+            position: fixed; top: 1.5rem; left: 0; width: 100%;
+            display: flex; justify-content: center; z-index: 1000;
+            transition: transform 0.4s var(--spring-soft);
+        }
+        .public-nav-wrapper.hidden { transform: translateY(-150%); }
+        .public-nav {
+            display: flex; align-items: center; justify-content: space-between;
+            background: var(--bg-glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            padding: 0.5rem 0.5rem 0.5rem 1.5rem; border-radius: var(--radius-pill);
+            box-shadow: var(--shadow-glass); border: var(--border-subtle);
+            width: 95%; max-width: 1200px;
+        }
+        .nav-brand { font-family: 'Plus Jakarta Sans'; font-weight: 800; font-size: 1.2rem; }
+        .nav-links { display: flex; gap: 0.5rem; align-items: center; }
+        .nav-link {
+            padding: 0.5rem 1rem; border-radius: var(--radius-pill); color: var(--text-secondary);
+            font-size: 0.9rem; font-weight: 500; transition: all 0.3s ease;
+        }
+        .nav-link:hover { color: var(--text-primary); background: rgba(255,255,255,0.05); }
+        .nav-actions { display: flex; gap: 0.5rem; align-items: center; }
+        .btn-ghost { padding: 0.6rem 1.2rem; border-radius: var(--radius-pill); font-weight: 600; font-size: 0.85rem; color: var(--text-secondary); transition: all 0.3s; }
+        .btn-ghost:hover { color: #fff; background: rgba(255,255,255,0.08); }
+        .btn-solid { background: #fff; color: #000; padding: 0.6rem 1.2rem; border-radius: var(--radius-pill); font-weight: 700; font-size: 0.85rem; transition: transform 0.3s var(--spring-bouncy), background 0.3s; }
+        .btn-solid:hover { transform: scale(1.05); background: #f4f4f5; }
+
+        /* Public Sections Base */
+        .pub-section { padding: 8rem 2rem 5rem; position: relative; z-index: 2; max-width: 1500px; margin-left: auto; margin-right: auto; }
+        .pub-section > * { margin-left: auto; margin-right: auto; }
+        .sec-header { text-align: center; margin-bottom: 5rem; max-width: 800px; margin-left: auto; margin-right: auto; }
+        .sec-badge { display: inline-block; padding: 0.4rem 1rem; border-radius: var(--radius-pill); background: rgba(255,255,255,0.05); border: var(--border-subtle); color: var(--text-secondary); font-size: 0.8rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 1rem; }
+        .sec-title { font-size: clamp(2.5rem, 5vw, 4rem); margin-bottom: 1rem; }
+        .sec-desc { color: var(--text-secondary); font-size: 1.1rem; max-width: 650px; margin: 0 auto; }
+
+        /* Hero */
+        .hero { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding-top: 10vh; text-align: center; position: relative; }
+        .mesh-gradient { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background-image: radial-gradient(circle at 15% 50%, rgba(14, 165, 233, 0.15), transparent 40%), radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.15), transparent 40%), radial-gradient(circle at 50% 80%, rgba(16, 185, 129, 0.1), transparent 40%); filter: blur(60px); animation: pulseMesh 15s ease-in-out infinite alternate; }
+        @keyframes pulseMesh { 0% { transform: scale(1); } 100% { transform: scale(1.1) rotate(2deg); } }
+        
+        .hero-title { font-size: clamp(4rem, 9vw, 8rem); letter-spacing: -0.05em; line-height: 1; margin-bottom: 1.5rem; background: linear-gradient(180deg, #fff 0%, #71717a 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero-subtitle { font-size: clamp(1.1rem, 2vw, 1.4rem); color: var(--text-secondary); max-width: 700px; margin: 0 auto 3rem; }
+        .hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 4rem; }
+        .btn-large { padding: 1rem 2rem; font-size: 1rem; border-radius: var(--radius-pill); font-weight: 600; display: flex; align-items: center; gap: 0.5rem; transition: all 0.3s; }
+        .btn-large.primary { background: #fff; color: #000; }
+        .btn-large.primary:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(255,255,255,0.15); }
+        .btn-large.secondary { background: rgba(255,255,255,0.05); color: #fff; border: var(--border-subtle); backdrop-filter: blur(10px); }
+        .btn-large.secondary:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); }
+        
+        .hero-shields-3d { display: flex; gap: 2rem; perspective: 1000px; }
+        .hero-shield { width: 100px; height: 100px; border-radius: 24px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; background: var(--bg-glass); backdrop-filter: blur(20px); border: var(--border-subtle); box-shadow: var(--shadow-glass), inset 0 1px 1px rgba(255,255,255,0.2); animation: float 6s ease-in-out infinite; }
+        .hero-shield:nth-child(1) { color: var(--brand-rider); animation-delay: 0s; }
+        .hero-shield:nth-child(2) { color: var(--brand-fit); animation-delay: -1.5s; width: 120px; height: 120px; font-size: 3rem; z-index: 2; }
+        .hero-shield:nth-child(3) { color: var(--brand-health); animation-delay: -3s; }
+        .hero-shield:nth-child(4) { color: var(--brand-wallet); animation-delay: -4.5s; }
+        @keyframes float { 0%, 100% { transform: translateY(0) rotateX(10deg) rotateY(-10deg); } 50% { transform: translateY(-20px) rotateX(15deg) rotateY(-5deg); box-shadow: 0 30px 60px rgba(0,0,0,0.8), inset 0 1px 1px rgba(255,255,255,0.3); } }
+
+        /* Ecosystem Bento */
+        .bento-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 2rem; width: 100%; max-width: 1400px; margin: 0 auto; }
+        .bento-card { background: var(--bg-elevated); border-radius: var(--radius-xl); padding: 3rem; border: var(--border-subtle); position: relative; overflow: hidden; display: flex; flex-direction: column; box-shadow: var(--shadow-glass); transition: transform 0.4s var(--spring-bouncy), border-color 0.4s; }
+        .bento-card:hover { border-color: rgba(255,255,255,0.15); transform: translateY(-5px); }
+        .bento-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(800px circle at var(--mx, 50%) var(--my, 50%), var(--accent), transparent 40%); opacity: 0; transition: opacity 0.3s; z-index: 0; pointer-events: none; }
+        .bento-card:hover::before { opacity: 0.1; }
+        
+        .bento-content { position: relative; z-index: 1; flex-grow: 1; }
+        .bento-icon { width: 64px; height: 64px; border-radius: 16px; background: rgba(255,255,255,0.05); border: var(--border-subtle); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin-bottom: 2rem; color: var(--accent); }
+        .bento-title { font-size: 2rem; margin-bottom: 1rem; }
+        .bento-desc { color: var(--text-secondary); margin-bottom: 2rem; }
+        .bento-list { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .bento-list li { display: flex; align-items: center; gap: 0.5rem; color: var(--text-tertiary); font-size: 0.9rem; }
+        .bento-list i { font-size: 0.6rem; color: var(--text-primary); }
+
+        .bento-full { grid-column: span 12; display: flex; flex-direction: row; align-items: center; gap: 4rem; }
+        .bento-half { grid-column: span 6; }
+        .bento-quarter { grid-column: span 4; }
+
+        /* Pure CSS Phone Mockup */
+        .mockup-phone { width: 280px; height: 580px; background: #000; border-radius: 40px; border: 12px solid #1a1a1a; position: relative; overflow: hidden; box-shadow: 0 25px 50px rgba(0,0,0,0.6), inset 0 0 0 2px #333; flex-shrink: 0; margin: 0 auto; }
+        .mockup-phone::before { content: ''; position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 20px; height: 20px; background: #111; border-radius: 50%; z-index: 10; box-shadow: inset 0 -2px 5px rgba(255,255,255,0.1); }
+        .mockup-ui { height: 100%; padding: 50px 20px 20px; display: flex; flex-direction: column; }
+        
+        .ui-rider { background: #0f172a; }
+        .ui-rider .ui-card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 15px; border-left: 3px solid var(--brand-rider); }
+        
+        .ui-wallet { background: #111; text-align: center; }
+        .ui-wallet .ui-bal { font-size: 36px; font-weight: bold; color: var(--brand-wallet); margin: 20px 0; }
+        
+        /* Timeline */
+        .timeline { max-width: 800px; margin: 0 auto; position: relative; }
+        .timeline::before { content: ''; position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.1), transparent); transform: translateX(-50%); }
+        .tl-item { display: flex; justify-content: flex-end; padding-right: 50%; position: relative; margin-bottom: 4rem; width: 100%; }
+        .tl-item:nth-child(even) { justify-content: flex-start; padding-right: 0; padding-left: 50%; }
+        .tl-content { width: 85%; background: var(--bg-surface); padding: 2rem; border-radius: var(--radius-md); border: var(--border-subtle); transition: transform 0.3s; }
+        .tl-content:hover { transform: translateY(-5px); border-color: rgba(255,255,255,0.2); }
+        .tl-dot { position: absolute; top: 50%; right: -42.5%; width: 16px; height: 16px; background: var(--bg-base); border: 3px solid #fff; border-radius: 50%; transform: translateY(-50%); z-index: 2; }
+        .tl-item:nth-child(even) .tl-dot { left: -8px; right: auto; }
+        .tl-year { color: var(--brand-fit); font-weight: 700; margin-bottom: 0.5rem; font-family: 'JetBrains Mono', monospace; }
+
+        /* AI Section */
+        .ai-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; width: 100%; max-width: 1400px; margin: 0 auto; }
+        .ai-card { background: rgba(255,255,255,0.02); border: var(--border-subtle); border-radius: var(--radius-lg); padding: 3rem 2rem; text-align: center; position: relative; overflow: hidden; transition: transform 0.4s; }
+        .ai-card:hover { transform: translateY(-10px); border-color: rgba(255,255,255,0.2); }
+        .ai-card::before { content: ''; position: absolute; top: -50px; left: 50%; transform: translateX(-50%); width: 150px; height: 150px; background: var(--accent); filter: blur(60px); opacity: 0.2; transition: opacity 0.4s; }
+        .ai-card:hover::before { opacity: 0.5; }
+        .ai-icon { font-size: 3rem; color: #fff; margin-bottom: 1.5rem; animation: floatBot 4s ease-in-out infinite; display: inline-block; }
+        @keyframes floatBot { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+        /* Stats */
+        .stats-banner { background: var(--bg-surface); border-top: var(--border-subtle); border-bottom: var(--border-subtle); padding: 5rem 5%; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 2rem; max-width: 1200px; margin: 0 auto; text-align: center; }
+        .stat-num { font-family: 'JetBrains Mono'; font-size: 3.5rem; font-weight: 700; background: linear-gradient(135deg, #fff, #888); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.5rem; }
+        .stat-label { color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+
+        /* Play Store / Downloads */
+        .dl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem; max-width: 1200px; margin: 0 auto; }
+        .dl-card { background: var(--bg-surface); border-radius: var(--radius-lg); border: var(--border-subtle); padding: 2rem; display: flex; flex-direction: column; gap: 1.5rem; transition: background 0.3s; }
+        .dl-card:hover { background: var(--bg-elevated); }
+        .dl-header { display: flex; gap: 1.5rem; align-items: center; }
+        .dl-icon { width: 70px; height: 70px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #fff; box-shadow: inset 0 1px 1px rgba(255,255,255,0.3); }
+        .dl-info h3 { font-size: 1.3rem; margin-bottom: 0.2rem; }
+        .dl-info span { font-size: 0.8rem; color: var(--text-tertiary); font-family: 'JetBrains Mono'; background: rgba(255,255,255,0.05); padding: 0.2rem 0.5rem; border-radius: 4px; }
+        .dl-btn { background: #fff; color: #000; border: none; padding: 1rem; border-radius: var(--radius-sm); font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.3s; width: 100%; }
+        .dl-btn:hover { transform: scale(1.02); background: #f4f4f5; }
+        .dl-btn.loading { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.2); }
+        .dl-btn.success { background: var(--brand-health); color: #fff; }
+
+        /* Changelog */
+        .changelog-box { max-width: 800px; margin: 0 auto; }
+        .cl-card { background: var(--bg-surface); border: var(--border-subtle); border-radius: var(--radius-md); padding: 2rem; margin-bottom: 1.5rem; }
+        .cl-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 1rem; }
+        .cl-ver { font-family: 'JetBrains Mono'; font-weight: 700; font-size: 1.2rem; background: var(--bg-glass); padding: 0.3rem 0.8rem; border-radius: var(--radius-pill); }
+        .cl-date { color: var(--text-secondary); font-size: 0.9rem; }
+        .cl-list h4 { font-size: 1rem; margin: 1rem 0 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+        .cl-list h4.new { color: var(--brand-rider); }
+        .cl-list h4.fix { color: var(--brand-admin); }
+        .cl-list ul { padding-left: 1.5rem; list-style-type: disc; color: var(--text-secondary); font-size: 0.95rem; }
+        .cl-list li { margin-bottom: 0.3rem; }
+
+        /* Technologies Grid */
+        .tech-grid { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; max-width: 900px; margin: 0 auto; }
+        .tech-tag { padding: 1rem 1.5rem; background: rgba(255,255,255,0.02); border: var(--border-subtle); border-radius: var(--radius-pill); display: flex; align-items: center; gap: 0.8rem; font-weight: 600; font-family: 'JetBrains Mono'; transition: all 0.3s; }
+        .tech-tag:hover { background: rgba(255,255,255,0.08); transform: translateY(-3px); }
+        .tech-tag i { font-size: 1.2rem; }
+
+        /* Gallery Full Width Slider */
+        .gallery-wrap { width: 100vw; margin-left: -5%; padding: 0 5% 2rem; display: flex; gap: 2rem; overflow-x: auto; scroll-snap-type: x mandatory; }
+        .gal-item { scroll-snap-align: center; flex: 0 0 80%; max-width: 900px; height: 500px; border-radius: var(--radius-xl); overflow: hidden; position: relative; border: var(--border-subtle); display: flex; background: var(--bg-elevated); }
+        .gal-text { width: 40%; padding: 4rem; display: flex; flex-direction: column; justify-content: center; }
+        .gal-text h3 { font-size: 2rem; margin-bottom: 1rem; }
+        .gal-visual { width: 60%; background: #000; position: relative; display: flex; align-items: center; justify-content: center; }
+
+        /* Contact & Footer */
+        .contact-form { max-width: 500px; margin: 0 auto; background: var(--bg-surface); padding: 3rem; border-radius: var(--radius-lg); border: var(--border-subtle); }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-input { width: 100%; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); padding: 1rem; border-radius: var(--radius-sm); color: #fff; transition: border 0.3s; }
+        .form-input:focus { outline: none; border-color: var(--brand-rider); }
+        .footer { background: var(--bg-surface); padding: 5rem 5% 2rem; border-top: var(--border-subtle); }
+        .foot-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 4rem; max-width: 1200px; margin: 0 auto 4rem; }
+        .foot-brand h2 { font-size: 1.8rem; margin-bottom: 1rem; }
+        .foot-col h4 { margin-bottom: 1.5rem; }
+        .foot-col li { margin-bottom: 0.8rem; color: var(--text-secondary); font-size: 0.9rem; cursor: pointer; transition: color 0.3s; }
+        .foot-col li:hover { color: #fff; }
+        .foot-bottom { border-top: 1px solid rgba(255,255,255,0.05); padding-top: 2rem; display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-tertiary); max-width: 1200px; margin: 0 auto; }
+
+        /* ==========================================================================
+           5. AUTHENTICATION VIEWS (Glass Panels)
+           ========================================================================== */
+        .auth-view { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: radial-gradient(circle at center, #111, #000); position: relative; }
+        .auth-card { background: var(--bg-glass-heavy); backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px); padding: 4rem; border-radius: var(--radius-xl); border: var(--border-subtle); box-shadow: var(--shadow-glass); width: 100%; max-width: 450px; text-align: center; position: relative; z-index: 2; }
+        .auth-icon { font-size: 3rem; margin-bottom: 1.5rem; }
+        .auth-title { font-size: 2rem; margin-bottom: 0.5rem; }
+        .auth-desc { color: var(--text-secondary); margin-bottom: 2.5rem; font-size: 0.95rem; }
+        .auth-input-group { position: relative; margin-bottom: 1.5rem; }
+        .auth-input-group i { position: absolute; left: 1.2rem; top: 50%; transform: translateY(-50%); color: var(--text-secondary); }
+        .auth-input { width: 100%; padding: 1.2rem 1.2rem 1.2rem 3rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-md); color: #fff; font-size: 1rem; transition: all 0.3s; }
+        .auth-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 15px rgba(255,255,255,0.05); }
+        .auth-btn { width: 100%; padding: 1.2rem; border-radius: var(--radius-md); background: #fff; color: #000; font-weight: 700; font-size: 1rem; transition: transform 0.3s; margin-bottom: 1rem; }
+        .auth-btn:hover { transform: translateY(-2px); }
+        .auth-back { color: var(--text-tertiary); font-size: 0.85rem; transition: color 0.3s; cursor: pointer; display: inline-block; }
+        .auth-back:hover { color: #fff; }
+        .auth-error { color: var(--brand-admin); font-size: 0.85rem; margin-top: -1rem; margin-bottom: 1rem; display: none; }
+
+        /* ==========================================================================
+           6. PRIVATE CATALOG VIEW
+           ========================================================================== */
+        #view-private-catalog { background: #050505; }
+        .catalog-header { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 5%; border-bottom: var(--border-subtle); background: var(--bg-surface); position: sticky; top: 0; z-index: 100; }
+        .catalog-brand { display: flex; align-items: center; gap: 1rem; font-family: 'Plus Jakarta Sans'; font-weight: 700; font-size: 1.2rem; }
+        .catalog-brand i { color: var(--brand-rider); }
+        .cat-badge { background: rgba(14, 165, 233, 0.1); color: var(--brand-rider); padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.7rem; font-family: 'JetBrains Mono'; }
+        .catalog-content { padding: 4rem 5%; max-width: 1400px; margin: 0 auto; }
+        .cat-section-title { font-size: 1.5rem; margin-bottom: 2rem; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        
+        .cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 4rem; }
+        .cat-card { background: var(--bg-elevated); border: var(--border-subtle); border-radius: var(--radius-md); padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; transition: background 0.3s; }
+        .cat-card:hover { background: rgba(255,255,255,0.03); }
+        .cat-card-head { display: flex; justify-content: space-between; align-items: flex-start; }
+        .cat-card-icon { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #fff; }
+        .cat-ver { font-family: 'JetBrains Mono'; font-size: 0.8rem; color: var(--brand-fit); }
+        .cat-card h4 { font-size: 1.1rem; }
+        .cat-card p { font-size: 0.85rem; color: var(--text-secondary); flex-grow: 1; }
+        .cat-dl { background: rgba(255,255,255,0.05); color: #fff; padding: 0.8rem; border-radius: var(--radius-sm); font-size: 0.85rem; font-weight: 600; text-align: center; transition: background 0.3s; }
+        .cat-dl:hover { background: #fff; color: #000; }
+
+        .file-list { background: var(--bg-elevated); border-radius: var(--radius-md); border: var(--border-subtle); overflow: hidden; }
+        .file-item { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.02); transition: background 0.2s; cursor: pointer; }
+        .file-item:hover { background: rgba(255,255,255,0.03); }
+        .file-item:last-child { border-bottom: none; }
+        .file-info { display: flex; align-items: center; gap: 1rem; }
+        .file-info i { font-size: 1.2rem; color: var(--text-secondary); }
+        .file-name { font-size: 0.95rem; font-weight: 500; }
+        .file-meta { font-family: 'JetBrains Mono'; font-size: 0.8rem; color: var(--text-tertiary); }
+        .file-action { color: var(--brand-rider); font-size: 0.9rem; font-weight: 600; }
+
+        /* ==========================================================================
+           7. ADMIN PANEL VIEW (Dashboard Enterprise)
+           ========================================================================== */
+        #view-admin-dashboard { display: none; height: 100vh; overflow: hidden; background: #020202; color: #fff; }
+        #view-admin-dashboard.active { display: flex; }
+        
+        /* Sidebar */
+        .admin-sidebar { width: 260px; background: #08080a; border-right: var(--border-subtle); display: flex; flex-direction: column; flex-shrink: 0; }
+        .admin-brand { height: 70px; display: flex; align-items: center; padding: 0 1.5rem; font-family: 'Plus Jakarta Sans'; font-weight: 800; font-size: 1.2rem; border-bottom: var(--border-subtle); color: var(--brand-admin); gap: 0.5rem; }
+        .admin-nav { padding: 1.5rem 1rem; flex-grow: 1; display: flex; flex-direction: column; gap: 0.5rem; }
+        .admin-nav-item { display: flex; align-items: center; gap: 1rem; padding: 0.8rem 1rem; border-radius: var(--radius-sm); color: var(--text-secondary); font-weight: 500; font-size: 0.9rem; transition: all 0.2s; cursor: pointer; }
+        .admin-nav-item i { width: 20px; text-align: center; font-size: 1.1rem; }
+        .admin-nav-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
+        .admin-nav-item.active { background: rgba(239, 68, 68, 0.1); color: var(--brand-admin); font-weight: 600; }
+        .admin-user { padding: 1.5rem; border-top: var(--border-subtle); display: flex; align-items: center; gap: 1rem; }
+        .admin-avatar { width: 40px; height: 40px; background: var(--brand-admin); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .admin-user-info h5 { font-size: 0.9rem; margin-bottom: 0.1rem; }
+        .admin-user-info span { font-size: 0.75rem; color: var(--text-tertiary); font-family: 'JetBrains Mono'; }
+
+        /* Main Content */
+        .admin-main { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        .admin-header { height: 70px; background: rgba(8,8,10,0.8); backdrop-filter: blur(10px); border-bottom: var(--border-subtle); display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; flex-shrink: 0; }
+        .admin-title { font-size: 1.2rem; font-weight: 600; }
+        .admin-actions { display: flex; gap: 1rem; }
+        .admin-btn-icon { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; color: var(--text-secondary); transition: all 0.2s; cursor: pointer; }
+        .admin-btn-icon:hover { background: rgba(255,255,255,0.1); color: #fff; }
+        
+        .admin-content-scroll { padding: 2rem; overflow-y: auto; height: calc(100vh - 70px); }
+        
+        /* Dashboard View */
+        .dash-grid-top { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .dash-stat-card { background: #0c0c0e; border: var(--border-subtle); border-radius: var(--radius-md); padding: 1.5rem; position: relative; overflow: hidden; }
+        .dash-stat-card::before { content:''; position:absolute; top:0; left:0; width:4px; height:100%; background: var(--card-color, #fff); }
+        .dash-stat-label { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.5rem; text-transform: uppercase; font-weight: 600; }
+        .dash-stat-val { font-family: 'JetBrains Mono'; font-size: 2.2rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .dash-stat-trend { font-size: 0.8rem; color: var(--brand-health); display: flex; align-items: center; gap: 0.3rem; }
+        .dash-stat-trend.down { color: var(--brand-admin); }
+
+        .dash-grid-mid { display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+        @media(max-width:1200px) { .dash-grid-mid { grid-template-columns: 1fr; } }
+        
+        .dash-panel { background: #0c0c0e; border: var(--border-subtle); border-radius: var(--radius-md); padding: 1.5rem; }
+        .dash-panel-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .dash-panel-title { font-size: 1.1rem; font-weight: 600; }
+
+        /* Custom CSS Bar Chart */
+        .css-chart { display: flex; align-items: flex-end; justify-content: space-between; height: 200px; padding-top: 20px; gap: 10px; }
+        .chart-bar-group { display: flex; flex-direction: column; align-items: center; gap: 10px; flex: 1; }
+        .chart-bar-wrap { width: 100%; height: 150px; background: rgba(255,255,255,0.02); border-radius: 4px; display: flex; align-items: flex-end; justify-content: center; position: relative; }
+        .chart-bar { width: 60%; background: linear-gradient(to top, var(--brand-admin), #fca5a5); border-radius: 4px; transition: height 1s var(--ease-out-expo); height: 0%; }
+        .chart-label { font-size: 0.75rem; color: var(--text-tertiary); font-family: 'JetBrains Mono'; }
+
+        /* Admin Tables */
+        .admin-table-wrap { overflow-x: auto; }
+        .admin-table { width: 100%; border-collapse: collapse; text-align: left; }
+        .admin-table th { padding: 1rem; color: var(--text-secondary); font-size: 0.85rem; font-weight: 600; border-bottom: var(--border-subtle); text-transform: uppercase; letter-spacing: 1px; }
+        .admin-table td { padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.02); font-size: 0.95rem; }
+        .admin-table tr:hover td { background: rgba(255,255,255,0.02); }
+        .status-badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; font-family: 'JetBrains Mono'; }
+        .status-active { background: rgba(16, 185, 129, 0.1); color: var(--brand-health); }
+        .status-beta { background: rgba(245, 158, 11, 0.1); color: var(--brand-wallet); }
+        .table-actions { display: flex; gap: 0.5rem; }
+        .btn-action { padding: 0.4rem 0.8rem; border-radius: 4px; background: rgba(255,255,255,0.05); font-size: 0.8rem; cursor: pointer; transition: background 0.2s; color: #fff; }
+        .btn-action:hover { background: rgba(255,255,255,0.1); }
+        .btn-action.danger:hover { background: rgba(239, 68, 68, 0.2); color: var(--brand-admin); }
+
+        /* Tab Content Management */
+        .admin-tab-content { display: none; animation: fadeInTab 0.3s ease; }
+        .admin-tab-content.active { display: block; }
+        @keyframes fadeInTab { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Form inside Admin */
+        .admin-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .admin-input { width: 100%; background: #000; border: 1px solid rgba(255,255,255,0.1); padding: 0.8rem 1rem; border-radius: var(--radius-sm); color: #fff; margin-top: 0.5rem; }
+        .admin-input:focus { outline: none; border-color: var(--brand-admin); }
+        .admin-label { font-size: 0.9rem; color: var(--text-secondary); }
+        .admin-submit { background: var(--brand-admin); color: #fff; border: none; padding: 0.8rem 2rem; border-radius: var(--radius-sm); font-weight: 600; margin-top: 1.5rem; cursor: pointer; }
+
+        /* ==========================================================================
+           8. ANIMATIONS & REVEALS
+           ========================================================================== */
+        .reveal { opacity: 0; transform: translateY(40px); transition: all 0.8s var(--ease-out-expo); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        /* ==========================================================================
+           9. RESPONSIVE DESIGN
+           ========================================================================== */
+        @media (max-width: 1024px) {
+            /* FIX CENTRADO: 1 sola columna => elimina los 11 gaps de 2rem que desbordaban */
+            .bento-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+            .bento-full, .bento-half, .bento-quarter { grid-column: 1 / -1; }
+            .bento-full { flex-direction: column; text-align: center; }
+            .mockup-phone { max-width: 100%; }
+            .bento-list { text-align: left; }
+            .foot-grid { grid-template-columns: 1fr 1fr; }
+            .dash-grid-mid { grid-template-columns: 1fr; }
+            .admin-form-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            .pub-section { padding: 6rem 1.2rem 4rem; }
+            .bento-card { padding: 1.5rem; }
+            .nav-links, .nav-actions .btn-ghost { display: none; }
+            .hero-shields-3d { flex-wrap: wrap; justify-content: center; }
+            .hero-shield { width: 70px; height: 70px; font-size: 1.8rem; }
+            .hero-shield:nth-child(2) { width: 90px; height: 90px; font-size: 2.2rem; }
+            .timeline::before { left: 20px; }
+            .tl-item { padding-right: 0; padding-left: 50px !important; justify-content: flex-start !important; }
+            .tl-content { width: 100%; }
+            .tl-dot { left: 12px !important; right: auto !important; }
+            .gal-item { flex-direction: column; height: auto; }
+            .gal-text, .gal-visual { width: 100%; }
+            .gal-visual { height: 300px; border-top: var(--border-subtle); border-left: none; }
+            .foot-grid { grid-template-columns: 1fr; text-align: center; }
+            .foot-bottom { flex-direction: column; gap: 1rem; text-align: center; }
+            
+            /* Admin Mobile */
+            .admin-sidebar { position: absolute; left: -260px; height: 100%; z-index: 100; transition: left 0.3s; }
+            .admin-sidebar.open { left: 0; box-shadow: 20px 0 50px rgba(0,0,0,0.8); }
+            .admin-menu-toggle { display: block !important; }
+        }
+        .admin-menu-toggle { display: none; margin-right: 1rem; font-size: 1.2rem; cursor: pointer; }
+
+        /* ==========================================================================
+           HAMBURGER + DRAWER
+           ========================================================================== */
+        .hamburger-btn { background: rgba(255,255,255,0.05); border: var(--border-subtle); color: var(--text-primary); width: 40px; height: 40px; border-radius: 50%; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s; }
+        .hamburger-btn:hover { background: rgba(255,255,255,0.12); transform: scale(1.05); }
+        .btn-ghost.admin-red { background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); color: #f87171; }
+        .nav-brand { flex: 1; text-align: center; }
+        .nav-links { display: none; }
+        
+        .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 1040; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .drawer-overlay.show { opacity: 1; pointer-events: auto; }
+        .drawer { position: fixed; top: 0; left: -300px; width: 300px; height: 100vh; background: rgba(10,10,15,0.95); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); z-index: 1050; transition: left 0.35s var(--ease-out-expo); display: flex; flex-direction: column; border-right: 1px solid rgba(255,255,255,0.08); }
+        .drawer.open { left: 0; box-shadow: 20px 0 60px rgba(0,0,0,0.5); }
+        .drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .drawer-brand { font-family: 'Plus Jakarta Sans'; font-weight: 800; font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .drawer-close { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; }
+        .drawer-nav { flex: 1; overflow-y: auto; padding: 1rem; }
+        .drawer-section-label { font-size: 0.7rem; font-weight: 700; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 1px; padding: 1rem 0.8rem 0.5rem; }
+        .drawer-item { display: flex; align-items: center; gap: 0.8rem; padding: 0.9rem 1rem; border-radius: 12px; color: var(--text-secondary); font-weight: 500; cursor: pointer; transition: all 0.2s; margin-bottom: 2px; }
+        .drawer-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
+        .drawer-item i { width: 20px; text-align: center; font-size: 1rem; }
+        .drawer-item.admin-item { color: #f87171; }
+        .drawer-item.admin-item:hover { background: rgba(239,68,68,0.1); }
+        .drawer-footer { padding: 1.5rem; border-top: 1px solid rgba(255,255,255,0.08); text-align: center; color: var(--text-tertiary); font-size: 0.75rem; }
+
+        /* ==========================================================================
+           TERMINAL VERDE
+           ========================================================================== */
+        .terminal-section { background: #000; color: #00FF41; font-family: 'JetBrains Mono', monospace; }
+        .term-cursor { display: inline-block; width: 10px; height: 1.1em; background: #00FF41; vertical-align: text-bottom; margin-left: 4px; animation: termBlink 1s steps(2) infinite; }
+        @keyframes termBlink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+        .terminal-block { border: 1px solid rgba(0,255,65,0.3); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; transition: all 0.3s; }
+        .terminal-block:hover { border-color: #00FF41; box-shadow: 0 0 20px rgba(0,255,65,0.15); }
+        .terminal-btn { background: transparent; color: #00FF41; border: 1px solid #00FF41; padding: 0.5rem 1.5rem; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-weight: 700; cursor: pointer; transition: all 0.2s; display: inline-block; margin-top: 0.5rem; }
+        .terminal-btn:hover { background: #00FF41; color: #000; }
+
+        /* ==========================================================================
+           RESEÑAS
+           ========================================================================== */
+        .star-input { color: rgba(255,255,255,0.2); transition: color 0.2s; }
+        .star-input.active { color: #fbbf24; }
+        .review-card { background: var(--bg-elevated); border-radius: 16px; padding: 1.2rem; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.06); }
+        
+        /* Responsive navbar */
+        @media (max-width: 768px) {
+            .nav-actions .btn-ghost span, .nav-actions .btn-solid span { display: none; }
+            .nav-actions .btn-ghost, .nav-actions .btn-solid { padding: 0.6rem 0.9rem; }
+            .nav-brand { font-size: 1rem; }
+            .drawer { width: 80%; left: -80%; }
+        }
+        
+        /* FIX: Pantallas anchas - usar más espacio */
+        @media (min-width: 1400px) {
+            .pub-section { max-width: 1600px; }
+            .bento-grid { max-width: 1500px; }
+            .ai-grid { max-width: 1500px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Filtro Textural (Noise) y Partículas para toda la app -->
+    <div class="noise-overlay"></div>
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- ==========================================================================
+         VISTA 1: SPLASH SCREEN (Evolución)
+         ========================================================================== -->
+    <div id="view-splash" class="app-view active">
+        <div class="splash-narrative">
+            <div class="splash-word" id="sw-1">Hojas de Excel</div>
+            <div class="splash-word" id="sw-2">RiderTrack</div>
+            <div class="splash-word" id="sw-3">FitTrack</div>
+            <div class="splash-word" id="sw-4">WalletTrack</div>
+            <div class="splash-word" id="sw-5">HealthTrack</div>
+            <div class="splash-word splash-final" id="sw-6">TRACKVERSE</div>
+        </div>
+        <div class="splash-shields" id="splash-shields">
+            <div class="spl-shield" style="color: var(--brand-rider)"><i class="fa-solid fa-motorcycle"></i></div>
+            <div class="spl-shield" style="color: var(--brand-fit)"><i class="fa-solid fa-dumbbell"></i></div>
+            <div class="spl-shield" style="color: var(--brand-health)"><i class="fa-solid fa-heart-pulse"></i></div>
+            <div class="spl-shield" style="color: var(--brand-wallet)"><i class="fa-solid fa-wallet"></i></div>
+        </div>
+        <div class="splash-bar-container">
+            <div class="splash-bar-fill" id="splash-bar"></div>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+         DRAWER (Menú Hamburguesa)
+         ========================================================================== -->
+    <div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+    <aside class="drawer" id="drawer">
+        <div class="drawer-header">
+            <div class="drawer-brand"><i class="fa-solid fa-layer-group"></i> TrackVerse</div>
+            <button class="drawer-close" onclick="closeDrawer()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <nav class="drawer-nav">
+            <div class="drawer-section-label">NAVEGACIÓN</div>
+            <div class="drawer-item" onclick="app.navigate('inicio')"><i class="fa-solid fa-house"></i> Inicio</div>
+            <div class="drawer-item" onclick="app.navigate('apps')"><i class="fa-solid fa-cube"></i> Apps</div>
+            <div class="drawer-item" onclick="app.navigate('reviews')"><i class="fa-solid fa-star"></i> Reseñas</div>
+            <div class="drawer-item" onclick="app.navigate('downloads')"><i class="fa-solid fa-download"></i> Descargas</div>
+            <div class="drawer-item" onclick="app.navigate('info')"><i class="fa-solid fa-circle-info"></i> Info & Stack</div>
+            <div class="drawer-section-label">ACCESO RESTRINGIDO</div>
+            <div class="drawer-item" onclick="app.navigate('catalog-auth')"><i class="fa-solid fa-lock"></i> Catálogo VIP</div>
+            <div class="drawer-item admin-item" onclick="app.navigate('admin-auth')"><i class="fa-solid fa-shield-halved"></i> Admin</div>
+        </nav>
+        <div class="drawer-footer">
+            <div>TrackVerse Enterprise OS</div>
+            <div style="margin-top:4px;opacity:0.5">v5.0 · by Rudy Alen</div>
+        </div>
+    </aside>
+
+    <!-- ==========================================================================
+         VISTA 2: PUBLIC PORTAL (Web Corporativa)
+         ========================================================================== -->
+    <div id="view-inicio" class="app-view">
+        
+        <!-- Navbar -->
+        <div class="public-nav-wrapper" id="public-navbar">
+            <nav class="public-nav">
+                <button class="hamburger-btn" onclick="toggleDrawer()" aria-label="Abrir menú"><i class="fa-solid fa-bars"></i></button>
+                <div class="nav-brand">TRACKVERSE</div>
+                <div class="nav-actions">
+                    <button class="btn-ghost admin-red" onclick="app.navigate('admin-auth')"><i class="fa-solid fa-shield-halved"></i> <span>Admin</span></button>
+                    <button class="btn-solid" onclick="app.navigate('catalog-auth')"><i class="fa-solid fa-lock"></i> <span>Catálogo</span></button>
+                </div>
+            </nav>
+        </div>
+
+        <!-- Hero Cinemático -->
+        <header class="hero" id="inicio">
+            <div class="mesh-gradient"></div>
+            <div class="sec-badge reveal"><i class="fa-solid fa-microchip"></i> TrackVerse Enterprise OS</div>
+            <h1 class="hero-title reveal" style="transition-delay: 0.1s;">Productividad.<br>Salud. Finanzas.</h1>
+            <p class="hero-subtitle reveal" style="transition-delay: 0.2s;">La plataforma corporativa definitiva. Cuatro aplicaciones nativas impulsadas por Inteligencia Artificial, integradas en un solo ecosistema de alto rendimiento.</p>
+            
+            <div class="hero-actions reveal" style="transition-delay: 0.3s;">
+                <button class="btn-large primary" onclick="app.navigate('apps')"><i class="fa-solid fa-compass"></i> Explorar Ecosistema</button>
+                <button class="btn-large secondary" onclick="app.navigate('downloads')"><i class="fa-brands fa-android"></i> Descargar Apps</button>
+            </div>
+
+            <div class="hero-shields-3d reveal" style="transition-delay: 0.4s;">
+                <div class="hero-shield"><i class="fa-solid fa-motorcycle"></i></div>
+                <div class="hero-shield"><i class="fa-solid fa-infinity"></i></div>
+                <div class="hero-shield"><i class="fa-solid fa-heart-pulse"></i></div>
+                <div class="hero-shield"><i class="fa-solid fa-wallet"></i></div>
+            </div>
+        </header>
+    </div> <!-- Fin View Inicio -->
+
+    <!-- ==========================================================================
+         VISTA 3: APPS (Ecosistema + Evolución + IA)
+         ========================================================================== -->
+    <div id="view-apps" class="app-view">
+        <!-- Navbar de Apps -->
+        <div class="public-nav-wrapper" id="apps-navbar">
+            <nav class="public-nav">
+                <button class="hamburger-btn" onclick="toggleDrawer()" aria-label="Abrir menú"><i class="fa-solid fa-bars"></i></button>
+                <div class="nav-brand">TRACKVERSE</div>
+                <div class="nav-actions">
+                    <button class="btn-ghost admin-red" onclick="app.navigate('admin-auth')"><i class="fa-solid fa-shield-halved"></i> <span>Admin</span></button>
+                    <button class="btn-solid" onclick="app.navigate('catalog-auth')"><i class="fa-solid fa-lock"></i> <span>Catálogo</span></button>
+                </div>
+            </nav>
+        </div>
+
+        <!-- Ecosistema -->
+        <section class="pub-section" id="ecosistema">
+            <div class="sec-header reveal">
+                <span class="sec-badge">Ingeniería de Software</span>
+                <h2 class="sec-title">Cuatro Pilares Core.</h2>
+                <p class="sec-desc">Cada aplicación está desarrollada nativamente para dominar su segmento específico, compartiendo una base de datos centralizada.</p>
+            </div>
+
+            <div class="bento-grid">
+                <!-- RiderTrack (Full) -->
+                <div class="bento-card bento-full reveal" style="--accent: rgba(14, 165, 233, 0.4);">
+                    <div class="bento-content">
+                        <div class="bento-icon" style="color: var(--brand-rider)"><i class="fa-solid fa-map-location-dot"></i></div>
+                        <h3 class="bento-title">RiderTrack Pro</h3>
+                        <p class="bento-desc">Motor logístico de nivel empresarial. Gestión de rutas en milisegundos, websockets bidireccionales y control de flotas con integración cartográfica nativa.</p>
+                        <ul class="bento-list">
+                            <li><i class="fa-solid fa-check"></i> Sincronización Firebase Realtime</li>
+                            <li><i class="fa-solid fa-check"></i> Algoritmo TSP para optimización</li>
+                            <li><i class="fa-solid fa-check"></i> Importación masiva Excel/CSV</li>
+                            <li><i class="fa-solid fa-check"></i> Captura fotográfica geolocalizada</li>
+                        </ul>
+                    </div>
+                    <div class="mockup-phone">
+                        <div class="mockup-ui ui-rider">
+                            <h4 style="color:#fff; margin-bottom:15px; font-size:14px;">Rutas Asignadas</h4>
+                            <div class="ui-card"><strong style="color:#fff">OT-8902</strong><br><span style="color:#94a3b8; font-size:11px;">Av. Empresarial 400</span></div>
+                            <div class="ui-card"><strong style="color:#fff">OT-8903</strong><br><span style="color:#94a3b8; font-size:11px;">Complejo Logístico Sur</span></div>
+                            <div style="height:80px; background:rgba(14,165,233,0.15); border-radius:12px; display:flex; align-items:center; justify-content:center; color:var(--brand-rider); margin-top:auto;">
+                                <i class="fa-solid fa-location-arrow fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- WalletTrack (Half) -->
+                <div class="bento-card bento-half reveal" style="--accent: rgba(245, 158, 11, 0.4);">
+                    <div class="bento-content">
+                        <div class="bento-icon" style="color: var(--brand-wallet)"><i class="fa-solid fa-chart-pie"></i></div>
+                        <h3 class="bento-title">WalletTrack</h3>
+                        <p class="bento-desc">Arquitectura financiera predictiva. Convierte datos transaccionales en inteligencia de capital.</p>
+                        <div class="mockup-phone" style="width: 100%; height: 200px; border-radius: 20px; border-width: 6px; margin-top: 2rem;">
+                            <div class="mockup-ui ui-wallet">
+                                <span style="color:#666; font-size:12px;">Capital Líquido</span>
+                                <div class="ui-bal">$245,250.00</div>
+                                <div style="width:100%; height:6px; background:#222; border-radius:3px; overflow:hidden; text-align:left;">
+                                    <div style="width:78%; height:100%; background:var(--brand-wallet);"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FitTrack (Half) -->
+                <div class="bento-card bento-half reveal" style="--accent: rgba(139, 92, 246, 0.4);">
+                    <div class="bento-content">
+                        <div class="bento-icon" style="color: var(--brand-fit)"><i class="fa-solid fa-dumbbell"></i></div>
+                        <h3 class="bento-title">FitTrack Analytics</h3>
+                        <p class="bento-desc">Cuantificación del esfuerzo físico. Modelos de hipertrofia y adaptación de volumen basados en algoritmos.</p>
+                        <ul class="bento-list" style="margin-top: 2rem;">
+                            <li><i class="fa-solid fa-check"></i> Ecuación 1RM dinámica</li>
+                            <li><i class="fa-solid fa-check"></i> Gráficos de tonelaje</li>
+                            <li><i class="fa-solid fa-check"></i> Tiempos bajo tensión (TUT)</li>
+                            <li><i class="fa-solid fa-check"></i> Periodización integrada</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- HealthTrack (Full Width Banner) -->
+                <div class="bento-card bento-full reveal" style="--accent: rgba(16, 185, 129, 0.3); padding: 2rem 3rem;">
+                    <div class="bento-icon" style="color: var(--brand-health); margin-bottom: 0;"><i class="fa-solid fa-heart-pulse"></i></div>
+                    <div>
+                        <h3 class="bento-title" style="margin-bottom: 0.5rem; font-size: 1.5rem;">HealthTrack System</h3>
+                        <p class="bento-desc" style="margin-bottom: 0;">Monitorización biométrica, control de suplementación y gestión de macros nutricionales centralizados.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Timeline (Evolución) -->
+        <section class="pub-section" id="evolucion" style="background: rgba(10,10,12,0.8);">
+            <div class="sec-header reveal">
+                <span class="sec-badge">Historia del Código</span>
+                <h2 class="sec-title">Del Excel al Ecosistema.</h2>
+            </div>
+            
+            <div class="timeline">
+                <div class="tl-item reveal">
+                    <div class="tl-dot"></div>
+                    <div class="tl-content">
+                        <div class="tl-year">Fase 1</div>
+                        <h3 class="bento-title" style="font-size: 1.3rem;">Exportación Excel</h3>
+                        <p class="bento-desc">Las operaciones se gestionaban mediante macros complejas y archivos compartidos. Insostenible a escala.</p>
+                    </div>
+                </div>
+                <div class="tl-item reveal">
+                    <div class="tl-dot"></div>
+                    <div class="tl-content">
+                        <div class="tl-year">Fase 2</div>
+                        <h3 class="bento-title" style="font-size: 1.3rem;">RiderTrack & WalletTrack</h3>
+                        <p class="bento-desc">Desarrollo de las primeras soluciones nativas para resolver la crisis logística y financiera.</p>
+                    </div>
+                </div>
+                <div class="tl-item reveal">
+                    <div class="tl-dot"></div>
+                    <div class="tl-content">
+                        <div class="tl-year">Fase 3</div>
+                        <h3 class="bento-title" style="font-size: 1.3rem;">FitTrack & HealthTrack</h3>
+                        <p class="bento-desc">Expansión hacia la optimización humana. Cuantificación del cuerpo y la salud metabólica.</p>
+                    </div>
+                </div>
+                <div class="tl-item reveal">
+                    <div class="tl-dot"></div>
+                    <div class="tl-content" style="border-color: var(--brand-rider); box-shadow: 0 0 20px rgba(14,165,233,0.1);">
+                        <div class="tl-year" style="color: var(--brand-rider)">Presente</div>
+                        <h3 class="bento-title" style="font-size: 1.3rem;">TrackVerse Enterprise & IA</h3>
+                        <p class="bento-desc">Unificación arquitectónica. Implementación de Modelos de Lenguaje (LLMs) para automatización cognitiva en todas las apps.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Inteligencia Artificial -->
+        <section class="pub-section" id="ia">
+            <div class="sec-header reveal">
+                <span class="sec-badge" style="color: var(--brand-ai); border-color: rgba(236,72,153,0.3);">Modelos Cognitivos</span>
+                <h2 class="sec-title">Agentes IA Integrados.</h2>
+                <p class="sec-desc">TrackVerse no requiere comandos complejos. Sus agentes integrados analizan tu contexto y actúan proactivamente.</p>
+            </div>
+
+            <div class="ai-grid">
+                <div class="ai-card reveal" style="--accent: var(--brand-health);">
+                    <div class="ai-icon"><i class="fa-solid fa-robot"></i></div>
+                    <h3 class="bento-title" style="font-size:1.5rem; color:var(--brand-health);">SaludBot IA</h3>
+                    <p class="bento-desc">Cruza datos de sueño, estrés y rendimiento para sugerir protocolos de recuperación y ajustes de suplementación diarios.</p>
+                </div>
+                <div class="ai-card reveal delay-1" style="--accent: #f97316;">
+                    <div class="ai-icon"><i class="fa-solid fa-utensils"></i></div>
+                    <h3 class="bento-title" style="font-size:1.5rem; color:#f97316;">ChefIA</h3>
+                    <p class="bento-desc">Motor generativo. Introduce tus macros (Proteínas/Carbos/Grasas) y ChefIA compondrá recetas matemáticamente perfectas y viables.</p>
+                </div>
+                <div class="ai-card reveal delay-2" style="--accent: var(--brand-fit);">
+                    <div class="ai-icon"><i class="fa-solid fa-brain"></i></div>
+                    <h3 class="bento-title" style="font-size:1.5rem; color:var(--brand-fit);">FitBot IA</h3>
+                    <p class="bento-desc">Entrenador algorítmico. Detecta estancamientos en tu Sistema Nervioso Central y ajusta tu volumen de entrenamiento automáticamente.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Estadísticas Banner -->
+        <div class="stats-banner reveal">
+            <div class="stats-grid">
+                <div><div class="stat-num" data-target="4">0</div><div class="stat-label">Aplicaciones</div></div>
+                <div><div class="stat-num" data-target="156">0</div><div class="stat-label">Funciones Core</div></div>
+                <div><div class="stat-num" data-target="85">0</div><div class="stat-label">Versiones</div></div>
+                <div><div class="stat-num" data-target="12">0</div><div class="stat-label">Agentes IA</div></div>
+            </div>
+        </div>
+    </div> <!-- Fin View Apps -->
+
+    <!-- ==========================================================================
+         VISTA 4: RESEÑAS (Sistema de comentarios con estrellitas)
+         ========================================================================== -->
+    <div id="view-reviews" class="app-view">
+        <!-- Navbar de Reseñas -->
+        <div class="public-nav-wrapper" id="reviews-navbar">
+            <nav class="public-nav">
+                <button class="hamburger-btn" onclick="toggleDrawer()" aria-label="Abrir menú"><i class="fa-solid fa-bars"></i></button>
+                <div class="nav-brand">TRACKVERSE</div>
+                <div class="nav-actions">
+                    <button class="btn-ghost admin-red" onclick="app.navigate('admin-auth')"><i class="fa-solid fa-shield-halved"></i> <span>Admin</span></button>
+                    <button class="btn-solid" onclick="app.navigate('catalog-auth')"><i class="fa-solid fa-lock"></i> <span>Catálogo</span></button>
+                </div>
+            </nav>
+        </div>
+
+        <section class="pub-section" style="max-width:900px;margin:0 auto;">
+            <div class="sec-header reveal">
+                <span class="sec-badge">Comunidad</span>
+                <h2 class="sec-title">Reseñas de la Comunidad.</h2>
+                <p class="sec-desc">Lo que dicen los usuarios de TrackVerse.</p>
+            </div>
+
+            <!-- Promedio -->
+            <div class="reviews-summary reveal" style="text-align:center;background:var(--bg-elevated);border-radius:24px;padding:2rem;margin-bottom:2rem;border:1px solid rgba(255,255,255,0.08);">
+                <div id="reviews-avg" style="font-size:3rem;font-weight:800;color:#fbbf24;">0.0</div>
+                <div id="reviews-avg-stars" style="font-size:1.5rem;color:#fbbf24;margin:0.5rem 0;">★★★★★</div>
+                <div id="reviews-count" style="color:var(--text-secondary);font-size:0.9rem;">0 reseñas</div>
+            </div>
+
+            <!-- Formulario -->
+            <div class="review-form reveal" style="background:var(--bg-elevated);border-radius:20px;padding:2rem;margin-bottom:2rem;border:1px solid rgba(255,255,255,0.08);">
+                <h3 style="margin-bottom:1rem;">Dejá tu reseña</h3>
+                <input type="text" id="review-name" placeholder="Tu nombre (o anónimo)" style="width:100%;padding:0.8rem 1rem;background:var(--bg-base);border:1px solid rgba(255,255,255,0.1);border-radius:12px;color:#fff;font-family:inherit;margin-bottom:1rem;">
+                <div style="margin-bottom:1rem;">
+                    <label style="display:block;margin-bottom:0.5rem;color:var(--text-secondary);font-size:0.9rem;">Calificación:</label>
+                    <div id="star-input" style="font-size:2rem;cursor:pointer;letter-spacing:0.3rem;">
+                        <span class="star-input" data-val="1" onclick="setStarInput(1)">★</span>
+                        <span class="star-input" data-val="2" onclick="setStarInput(2)">★</span>
+                        <span class="star-input" data-val="3" onclick="setStarInput(3)">★</span>
+                        <span class="star-input" data-val="4" onclick="setStarInput(4)">★</span>
+                        <span class="star-input" data-val="5" onclick="setStarInput(5)">★</span>
+                    </div>
+                </div>
+                <textarea id="review-comment" placeholder="Escribí tu comentario..." style="width:100%;padding:0.8rem 1rem;background:var(--bg-base);border:1px solid rgba(255,255,255,0.1);border-radius:12px;color:#fff;font-family:inherit;min-height:80px;resize:vertical;margin-bottom:1rem;"></textarea>
+                <button onclick="agregarReview()" style="background:linear-gradient(135deg,var(--brand-rider),var(--brand-fit));color:#fff;border:none;padding:0.8rem 2rem;border-radius:12px;font-weight:700;cursor:pointer;width:100%;font-size:1rem;">Publicar Reseña</button>
+            </div>
+
+            <!-- Lista de reseñas -->
+            <div id="reviews-list"></div>
+        </section>
+    </div> <!-- Fin View Reviews -->
+
+    <!-- ==========================================================================
+         VISTA 5: DOWNLOADS (Terminal Verde)
+         ========================================================================== -->
+    <div id="view-downloads" class="app-view">
+        <!-- Navbar de Downloads -->
+        <div class="public-nav-wrapper" id="downloads-navbar">
+            <nav class="public-nav">
+                <button class="hamburger-btn" onclick="toggleDrawer()" aria-label="Abrir menú"><i class="fa-solid fa-bars"></i></button>
+                <div class="nav-brand">TRACKVERSE</div>
+                <div class="nav-actions">
+                    <button class="btn-ghost admin-red" onclick="app.navigate('admin-auth')"><i class="fa-solid fa-shield-halved"></i> <span>Admin</span></button>
+                    <button class="btn-solid" onclick="app.navigate('catalog-auth')"><i class="fa-solid fa-lock"></i> <span>Catálogo</span></button>
+                </div>
+            </nav>
+        </div>
+
+        <section class="terminal-section" style="min-height:100vh;padding:8rem 2rem 4rem;">
+            <div style="max-width:900px;margin:0 auto;">
+                <div style="font-size:1.5rem;color:#00FF41;margin-bottom:2rem;border-bottom:1px solid rgba(0,255,65,0.3);padding-bottom:1rem;">
+                    > trackverse://downloads<span class="term-cursor">_</span>
+                </div>
+                <div id="terminal-apps-list" style="font-family:'JetBrains Mono',monospace;">
+                    <div style="text-align:center;padding:3rem;color:#00FF41;opacity:0.5;">
+                        <i class="fa-solid fa-circle-notch fa-spin" style="font-size:2rem;"></i>
+                        <p style="margin-top:1rem;">Cargando binarios...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div> <!-- Fin View Downloads -->
+
+    <!-- ==========================================================================
+         VISTA 6: SECCIONES ADICIONALES (Changelog + Tech + Galería + Footer)
+         ========================================================================== -->
+    <div id="view-info" class="app-view">
+        <!-- Navbar de Info -->
+        <div class="public-nav-wrapper" id="info-navbar">
+            <nav class="public-nav">
+                <button class="hamburger-btn" onclick="toggleDrawer()" aria-label="Abrir menú"><i class="fa-solid fa-bars"></i></button>
+                <div class="nav-brand">TRACKVERSE</div>
+                <div class="nav-actions">
+                    <button class="btn-ghost admin-red" onclick="app.navigate('admin-auth')"><i class="fa-solid fa-shield-halved"></i> <span>Admin</span></button>
+                    <button class="btn-solid" onclick="app.navigate('catalog-auth')"><i class="fa-solid fa-lock"></i> <span>Catálogo</span></button>
+                </div>
+            </nav>
+        </div>
+
+        <!-- Descargas (Play Store Style) -->
+        <section class="pub-section" id="descargas">
+            <div class="sec-header reveal">
+                <span class="sec-badge">Distribución</span>
+                <h2 class="sec-title">Centro de Descargas.</h2>
+                <p class="sec-desc">Repositorio oficial para obtener los binarios compilados más recientes.</p>
+            </div>
+
+            <div class="dl-grid">
+                <!-- App 1 -->
+                <div class="dl-card reveal">
+                    <div class="dl-header">
+                        <div class="dl-icon" style="background: linear-gradient(135deg, var(--brand-rider), #0284c7);"><i class="fa-solid fa-motorcycle"></i></div>
+                        <div class="dl-info"><h3>RiderTrack Pro</h3><span>v5.2.0-stable</span></div>
+                    </div>
+                    <p class="dl-desc">Logística empresarial y ruteo GPS en tiempo real.</p>
+                    <button class="dl-btn" onclick="simularAPK(this)"><i class="fa-brands fa-android"></i> Descargar APK (24MB)</button>
+                </div>
+                <!-- App 2 -->
+                <div class="dl-card reveal delay-1">
+                    <div class="dl-header">
+                        <div class="dl-icon" style="background: linear-gradient(135deg, var(--brand-fit), #6d28d9);"><i class="fa-solid fa-dumbbell"></i></div>
+                        <div class="dl-info"><h3>FitTrack Analytics</h3><span>v3.1.5-stable</span></div>
+                    </div>
+                    <p class="dl-desc">Control de hipertrofia y rutinas algorítmicas.</p>
+                    <button class="dl-btn" onclick="simularAPK(this)"><i class="fa-brands fa-android"></i> Descargar APK (31MB)</button>
+                </div>
+                <!-- App 3 -->
+                <div class="dl-card reveal">
+                    <div class="dl-header">
+                        <div class="dl-icon" style="background: linear-gradient(135deg, var(--brand-health), #047857);"><i class="fa-solid fa-heart-pulse"></i></div>
+                        <div class="dl-info"><h3>HealthTrack</h3><span>v2.0.1-stable</span></div>
+                    </div>
+                    <p class="dl-desc">Nutrición impulsada por ChefIA y control biométrico.</p>
+                    <button class="dl-btn" onclick="simularAPK(this)"><i class="fa-brands fa-android"></i> Descargar APK (28MB)</button>
+                </div>
+                <!-- App 4 -->
+                <div class="dl-card reveal delay-1">
+                    <div class="dl-header">
+                        <div class="dl-icon" style="background: linear-gradient(135deg, var(--brand-wallet), #b45309);"><i class="fa-solid fa-wallet"></i></div>
+                        <div class="dl-info"><h3>WalletTrack</h3><span>v4.5.0-stable</span></div>
+                    </div>
+                    <p class="dl-desc">Dashboard financiero y presupuestos predictivos.</p>
+                    <button class="dl-btn" onclick="simularAPK(this)"><i class="fa-brands fa-android"></i> Descargar APK (19MB)</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Changelog & Tech Stack -->
+        <section class="pub-section" style="background: rgba(10,10,12,0.8);">
+            <div class="sec-header reveal"><h2 class="sec-title">Release Notes & Stack.</h2></div>
+            
+            <div class="bento-grid" style="max-width: 1200px;">
+                
+                <div class="bento-card bento-half reveal" style="padding: 2rem;">
+                    <h3 class="bento-title" style="font-size:1.5rem; margin-bottom: 2rem;"><i class="fa-solid fa-code-commit"></i> Changelog Global</h3>
+                    <div class="changelog-box">
+                        <div class="cl-card">
+                            <div class="cl-head"><span class="cl-ver">v5.2.0</span><span class="cl-date">Hace 2 días</span></div>
+                            <div class="cl-list">
+                                <h4 class="new"><i class="fa-solid fa-star"></i> Novedades</h4>
+                                <ul><li>Integración de Gemini Flash para ChefIA.</li><li>Nuevo motor de renderizado de gráficos en WalletTrack.</li></ul>
+                                <h4 class="fix"><i class="fa-solid fa-wrench"></i> Correcciones</h4>
+                                <ul><li>Fix: Fuga de memoria en el listener de Firebase (RiderTrack).</li></ul>
+                            </div>
+                        </div>
+                        <div class="cl-card">
+                            <div class="cl-head"><span class="cl-ver">v5.1.5</span><span class="cl-date">Hace 2 semanas</span></div>
+                            <div class="cl-list">
+                                <h4 class="new"><i class="fa-solid fa-star"></i> Novedades</h4>
+                                <ul><li>Soporte nativo para Android 14.</li></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bento-card bento-half reveal delay-1" style="padding: 2rem; display:flex; flex-direction:column;">
+                    <h3 class="bento-title" style="font-size:1.5rem; margin-bottom: 2rem; text-align:center;"><i class="fa-solid fa-microchip"></i> Stack Tecnológico</h3>
+                    <div class="tech-grid" style="flex-grow: 1; align-content: center;">
+                        <div class="tech-tag"><i class="fa-brands fa-html5" style="color:#e34f26"></i> HTML5</div>
+                        <div class="tech-tag"><i class="fa-brands fa-css3-alt" style="color:#1572b6"></i> CSS3</div>
+                        <div class="tech-tag"><i class="fa-brands fa-js" style="color:#f7df1e"></i> JavaScript</div>
+                        <div class="tech-tag"><i class="fa-solid fa-database" style="color:#ffca28"></i> Firebase</div>
+                        <div class="tech-tag"><i class="fa-solid fa-mobile-screen" style="color:#38bdf8"></i> Capacitor</div>
+                        <div class="tech-tag"><i class="fa-brands fa-github" style="color:#fff"></i> GitHub Actions</div>
+                        <div class="tech-tag"><i class="fa-solid fa-brain" style="color:#a855f7"></i> Gemini IA</div>
+                        <div class="tech-tag"><i class="fa-solid fa-table" style="color:#107c41"></i> SheetJS</div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Galería Slider -->
+        <section class="pub-section" style="padding-bottom: 2rem;">
+            <div class="sec-header reveal"><h2 class="sec-title">Experiencia Nativa.</h2></div>
+            <div class="gallery-wrap">
+                <div class="gal-item reveal">
+                    <div class="gal-text">
+                        <h3 style="color: var(--brand-rider)">Interfaces OLED</h3>
+                        <p class="bento-desc">Diseños optimizados para pantallas AMOLED, reduciendo el consumo energético en jornadas operativas largas.</p>
+                    </div>
+                    <div class="gal-visual" style="background: #020617;"><i class="fa-solid fa-layer-group fa-5x" style="color: rgba(255,255,255,0.05)"></i></div>
+                </div>
+                <div class="gal-item reveal delay-1">
+                    <div class="gal-text">
+                        <h3 style="color: var(--brand-wallet)">Datos Limpios</h3>
+                        <p class="bento-desc">Sin ruido visual. Paneles de control estructurados para la rápida toma de decisiones cognitivas.</p>
+                    </div>
+                    <div class="gal-visual" style="background: #18181b;"><i class="fa-solid fa-chart-simple fa-5x" style="color: rgba(255,255,255,0.05)"></i></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contacto & Footer -->
+        <footer class="footer">
+            <div class="sec-header reveal" style="margin-bottom: 3rem;"><h2 class="sec-title" style="font-size: 2rem;">¿Propuestas corporativas?</h2></div>
+            <form class="contact-form reveal" onsubmit="event.preventDefault(); alert('Mensaje enviado.');">
+                <div class="form-group"><input type="text" class="form-input" placeholder="Nombre completo" required></div>
+                <div class="form-group"><input type="email" class="form-input" placeholder="Correo corporativo" required></div>
+                <div class="form-group"><textarea class="form-input" placeholder="Detalles de la propuesta" rows="4" required></textarea></div>
+                <button class="btn-large primary" style="width: 100%; justify-content: center;">Enviar Mensaje</button>
+            </form>
+
+            <div class="foot-grid reveal" style="margin-top: 6rem;">
+                <div class="foot-brand">
+                    <h2>TRACKVERSE</h2>
+                    <p class="bento-desc" style="font-size:0.9rem;">Productividad. Salud. Entrenamiento. Finanzas. <br>Ingeniería para el máximo rendimiento.</p>
+                </div>
+                <div class="foot-col">
+                    <h4>Ecosistema</h4>
+                    <ul><li>RiderTrack Pro</li><li>FitTrack Analytics</li><li>HealthTrack System</li><li>WalletTrack</li></ul>
+                </div>
+                <div class="foot-col">
+                    <h4>Plataforma</h4>
+                    <ul><li onclick="app.navigate('catalog-auth')">Catálogo Privado</li><li onclick="app.navigate('admin-auth')">Panel Admin</li><li>Changelog</li><li>Documentación API</li></ul>
+                </div>
+                <div class="foot-col">
+                    <h4>Legal</h4>
+                    <ul><li>Términos de uso</li><li>Privacidad de datos</li><li>Licencias de código</li></ul>
+                </div>
+            </div>
+            <div class="foot-bottom">
+                <span>&copy; <span id="year"></span> TrackVerse Enterprise.</span>
+                <span>Diseñado sin frameworks. Rendimiento puro.</span>
+            </div>
+        </footer>
+
+    </div> <!-- Fin View Info -->
+
+    <!-- ==========================================================================
+         VISTA 7: LOGIN CATÁLOGO PRIVADO
+         ========================================================================== -->
+    <div id="view-catalog-auth" class="app-view auth-view">
+        <div class="auth-card">
+            <i class="fa-solid fa-lock auth-icon" style="color: var(--brand-rider)"></i>
+            <h2 class="auth-title">Catálogo Privado</h2>
+            <p class="auth-desc">Acceso restringido para clientes y beta testers autorizados.</p>
+            <form onsubmit="app.login(event, 'catalog')">
+                <div class="auth-input-group">
+                    <i class="fa-solid fa-key"></i>
+                    <input type="password" id="cat-pwd" class="auth-input" placeholder="Contraseña de acceso" required>
+                </div>
+                <div class="auth-error" id="cat-error">Contraseña incorrecta. Pista: catalog123</div>
+                <button type="submit" class="auth-btn">Acceder al Portal</button>
+                <span class="auth-back" onclick="app.navigate('public')"><i class="fa-solid fa-arrow-left"></i> Volver a la web pública</span>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+         VISTA 4: CATÁLOGO PRIVADO (Portal de Clientes)
+         ========================================================================== -->
+    <div id="view-private-catalog" class="app-view">
+        <div class="catalog-header">
+            <div class="catalog-brand"><i class="fa-solid fa-boxes-stacked"></i> TrackVerse <span class="cat-badge">CATÁLOGO VIP</span></div>
+            <button class="btn-ghost" onclick="app.navigate('public')"><i class="fa-solid fa-right-from-bracket"></i> Salir</button>
+        </div>
+        
+        <div class="catalog-content">
+            <h2 class="cat-section-title">Versiones Beta (Early Access)</h2>
+            <div class="cat-grid">
+                <div class="cat-card">
+                    <div class="cat-card-head">
+                        <div class="cat-card-icon" style="background: rgba(14,165,233,0.1); color: var(--brand-rider);"><i class="fa-solid fa-motorcycle"></i></div>
+                        <span class="cat-ver">v6.0-beta1</span>
+                    </div>
+                    <h4>RiderTrack Nightly</h4>
+                    <p>Contiene el nuevo algoritmo de ruteo experimental. Puede ser inestable.</p>
+                    <button class="cat-dl" onclick="alert('Descarga iniciada')"><i class="fa-solid fa-download"></i> Obtener APK</button>
+                </div>
+                <div class="cat-card">
+                    <div class="cat-card-head">
+                        <div class="cat-card-icon" style="background: rgba(139,92,246,0.1); color: var(--brand-fit);"><i class="fa-solid fa-dumbbell"></i></div>
+                        <span class="cat-ver">v4.0-rc2</span>
+                    </div>
+                    <h4>FitTrack Release Candidate</h4>
+                    <p>Integración preliminar con smartwatches WearOS.</p>
+                    <button class="cat-dl" onclick="alert('Descarga iniciada')"><i class="fa-solid fa-download"></i> Obtener APK</button>
+                </div>
+            </div>
+
+            <h2 class="cat-section-title">Documentación y Herramientas</h2>
+            <div class="file-list">
+                <div class="file-item" onclick="alert('Abriendo PDF...')">
+                    <div class="file-info"><i class="fa-solid fa-file-pdf"></i><span class="file-name">Manual_Integracion_API_v2.pdf</span></div>
+                    <div style="display:flex; gap: 2rem; align-items:center;">
+                        <span class="file-meta">2.4 MB • Ayer</span><span class="file-action"><i class="fa-solid fa-eye"></i> Ver</span>
+                    </div>
+                </div>
+                <div class="file-item" onclick="alert('Descargando ZIP...')">
+                    <div class="file-info"><i class="fa-solid fa-file-zipper"></i><span class="file-name">Assets_Corporativos_Alta_Resolucion.zip</span></div>
+                    <div style="display:flex; gap: 2rem; align-items:center;">
+                        <span class="file-meta">45.1 MB • 12 Oct</span><span class="file-action"><i class="fa-solid fa-download"></i> Bajar</span>
+                    </div>
+                </div>
+                <div class="file-item" onclick="alert('Abriendo Excel...')">
+                    <div class="file-info"><i class="fa-solid fa-file-excel" style="color: #107c41;"></i><span class="file-name">Plantilla_Importacion_RiderTrack.xlsx</span></div>
+                    <div style="display:flex; gap: 2rem; align-items:center;">
+                        <span class="file-meta">12 KB • 01 Sep</span><span class="file-action"><i class="fa-solid fa-download"></i> Bajar</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+         VISTA 5: LOGIN ADMIN
+         ========================================================================== -->
+    <div id="view-admin-auth" class="app-view auth-view">
+        <div class="auth-card" style="border-color: rgba(239, 68, 68, 0.3);">
+            <i class="fa-solid fa-shield-halved auth-icon" style="color: var(--brand-admin)"></i>
+            <h2 class="auth-title">System Admin</h2>
+            <p class="auth-desc">Panel de control de la infraestructura TrackVerse.</p>
+            <form onsubmit="app.login(event, 'admin')">
+                <div class="auth-input-group">
+                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" id="adm-pwd" class="auth-input" placeholder="Clave de administrador" required>
+                </div>
+                <div class="auth-error" id="adm-error">Contraseña incorrecta. Pista: admin123</div>
+                <button type="submit" class="auth-btn" style="background: var(--brand-admin); color: #fff;">Autenticar Sysadmin</button>
+                <span class="auth-back" onclick="app.navigate('public')"><i class="fa-solid fa-arrow-left"></i> Abortar y volver</span>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+         VISTA 6: ADMIN DASHBOARD (El Panel Maestro)
+         ========================================================================== -->
+    <div id="view-admin-dashboard" class="app-view">
+        <!-- Sidebar -->
+        <div class="admin-sidebar" id="admin-sidebar">
+            <div class="admin-brand"><i class="fa-solid fa-layer-group"></i> TrackVerse OS</div>
+            <div class="admin-nav">
+                <div class="admin-nav-item active" onclick="app.switchAdminTab('dash')"><i class="fa-solid fa-chart-pie"></i> Dashboard</div>
+                <div class="admin-nav-item" onclick="app.switchAdminTab('apps')"><i class="fa-brands fa-android"></i> Aplicaciones</div>
+                <div class="admin-nav-item" onclick="app.switchAdminTab('users')"><i class="fa-solid fa-users"></i> Usuarios VIP</div>
+                <div class="admin-nav-item" onclick="app.switchAdminTab('logs')"><i class="fa-solid fa-terminal"></i> Changelog</div>
+                <div class="admin-nav-item" onclick="app.switchAdminTab('settings')"><i class="fa-solid fa-gear"></i> Configuración</div>
+            </div>
+            <div class="admin-user">
+                <div class="admin-avatar">SA</div>
+                <div class="admin-user-info"><h5>System Admin</h5><span>Nivel de Acceso 5</span></div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="admin-main">
+            <div class="admin-header">
+                <div style="display:flex; align-items:center;">
+                    <i class="fa-solid fa-bars admin-menu-toggle" onclick="document.getElementById('admin-sidebar').classList.toggle('open')"></i>
+                    <div class="admin-title" id="admin-top-title">Dashboard General</div>
+                </div>
+                <div class="admin-actions">
+                    <div class="admin-btn-icon" title="Notificaciones"><i class="fa-regular fa-bell"></i></div>
+                    <div class="admin-btn-icon" title="Cerrar Sesión" onclick="app.navigate('public')"><i class="fa-solid fa-power-off"></i></div>
+                </div>
+            </div>
+
+            <div class="admin-content-scroll">
+                
+                <!-- TAB 1: DASHBOARD -->
+                <div id="tab-dash" class="admin-tab-content active">
+                    <div class="dash-grid-top">
+                        <div class="dash-stat-card" style="--card-color: var(--brand-rider);">
+                            <div class="dash-stat-label">Descargas Totales</div>
+                            <div class="dash-stat-val">12,450</div>
+                            <div class="dash-stat-trend"><i class="fa-solid fa-arrow-trend-up"></i> +12% esta semana</div>
+                        </div>
+                        <div class="dash-stat-card" style="--card-color: var(--brand-fit);">
+                            <div class="dash-stat-label">Usuarios Activos</div>
+                            <div class="dash-stat-val">3,892</div>
+                            <div class="dash-stat-trend"><i class="fa-solid fa-arrow-trend-up"></i> +5% esta semana</div>
+                        </div>
+                        <div class="dash-stat-card" style="--card-color: var(--brand-health);">
+                            <div class="dash-stat-label">Peticiones IA</div>
+                            <div class="dash-stat-val">45.2K</div>
+                            <div class="dash-stat-trend"><i class="fa-solid fa-arrow-trend-up"></i> +45% esta semana</div>
+                        </div>
+                        <div class="dash-stat-card" style="--card-color: var(--brand-admin);">
+                            <div class="dash-stat-label">Errores Reportados</div>
+                            <div class="dash-stat-val">12</div>
+                            <div class="dash-stat-trend down"><i class="fa-solid fa-arrow-trend-down"></i> -2% (Mejora)</div>
+                        </div>
+                    </div>
+
+                    <div class="dash-grid-mid">
+                        <div class="dash-panel">
+                            <div class="dash-panel-head"><div class="dash-panel-title">Tráfico de Red (Simulado con CSS)</div></div>
+                            <div class="css-chart" id="sim-chart">
+                                <!-- Generado por JS -->
+                            </div>
+                        </div>
+                        <div class="dash-panel">
+                            <div class="dash-panel-head"><div class="dash-panel-title">Actividad Reciente</div></div>
+                            <ul style="font-size: 0.9rem; color: var(--text-secondary); display:flex; flex-direction:column; gap:1rem;">
+                                <li><strong style="color:#fff;">SA</strong> subió nuevo APK RiderTrack v5.2 (Hace 2h)</li>
+                                <li><strong style="color:#fff;">Sistema</strong> bloqueó IP maliciosa 192... (Hace 5h)</li>
+                                <li><strong style="color:#fff;">Usuario</strong> 'cliente_vip' descargó Beta (Hace 1d)</li>
+                                <li><strong style="color:#fff;">SA</strong> actualizó Changelog Global (Hace 2d)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: APPS -->
+                <div id="tab-apps" class="admin-tab-content">
+                    <div class="dash-panel">
+                        <div class="dash-panel-head">
+                            <div class="dash-panel-title">Gestión de Binarios (APKs)</div>
+                            <button class="btn-action" style="background: var(--brand-rider);"><i class="fa-solid fa-upload"></i> Subir APK</button>
+                        </div>
+                        <div class="admin-table-wrap">
+                            <table class="admin-table">
+                                <thead><tr><th>Aplicación</th><th>Versión</th><th>Estado</th><th>Descargas</th><th>Acciones</th></tr></thead>
+                                <tbody>
+                                    <tr><td><strong>RiderTrack Pro</strong></td><td>v5.2.0</td><td><span class="status-badge status-active">Estable</span></td><td>5,230</td><td class="table-actions"><button class="btn-action"><i class="fa-solid fa-pen"></i></button><button class="btn-action danger"><i class="fa-solid fa-trash"></i></button></td></tr>
+                                    <tr><td><strong>RiderTrack Nightly</strong></td><td>v6.0-b1</td><td><span class="status-badge status-beta">Beta</span></td><td>420</td><td class="table-actions"><button class="btn-action"><i class="fa-solid fa-pen"></i></button><button class="btn-action danger"><i class="fa-solid fa-trash"></i></button></td></tr>
+                                    <tr><td><strong>FitTrack Analytics</strong></td><td>v3.1.5</td><td><span class="status-badge status-active">Estable</span></td><td>3,800</td><td class="table-actions"><button class="btn-action"><i class="fa-solid fa-pen"></i></button><button class="btn-action danger"><i class="fa-solid fa-trash"></i></button></td></tr>
+                                    <tr><td><strong>HealthTrack</strong></td><td>v2.0.1</td><td><span class="status-badge status-active">Estable</span></td><td>2,100</td><td class="table-actions"><button class="btn-action"><i class="fa-solid fa-pen"></i></button><button class="btn-action danger"><i class="fa-solid fa-trash"></i></button></td></tr>
+                                    <tr><td><strong>WalletTrack</strong></td><td>v4.5.0</td><td><span class="status-badge status-active">Estable</span></td><td>1,320</td><td class="table-actions"><button class="btn-action"><i class="fa-solid fa-pen"></i></button><button class="btn-action danger"><i class="fa-solid fa-trash"></i></button></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: USERS -->
+                <div id="tab-users" class="admin-tab-content">
+                    <div class="dash-panel">
+                        <div class="dash-panel-head">
+                            <div class="dash-panel-title">Usuarios VIP Autorizados</div>
+                            <button class="btn-action"><i class="fa-solid fa-plus"></i> Añadir Usuario</button>
+                        </div>
+                        <div class="admin-table-wrap">
+                            <table class="admin-table">
+                                <thead><tr><th>ID</th><th>Email / Empresa</th><th>Nivel</th><th>Último Acceso</th><th>Acciones</th></tr></thead>
+                                <tbody>
+                                    <tr><td>USR-001</td><td>logistica@empresa.com</td><td><span class="status-badge status-beta">Tester</span></td><td>Hace 2 min</td><td class="table-actions"><button class="btn-action danger">Revocar</button></td></tr>
+                                    <tr><td>USR-002</td><td>ceo@startup.io</td><td><span class="status-badge status-active">VIP</span></td><td>Ayer</td><td class="table-actions"><button class="btn-action danger">Revocar</button></td></tr>
+                                    <tr><td>USR-003</td><td>demo_account</td><td><span class="status-badge" style="background:#333; color:#aaa;">Guest</span></td><td>Hace 1 mes</td><td class="table-actions"><button class="btn-action danger">Revocar</button></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 4: LOGS / CHANGELOG -->
+                <div id="tab-logs" class="admin-tab-content">
+                    <div class="dash-panel">
+                        <div class="dash-panel-head"><div class="dash-panel-title">Publicar Actualización</div></div>
+                        <form onsubmit="event.preventDefault(); alert('Changelog guardado');" class="admin-form-grid">
+                            <div><label class="admin-label">Versión</label><input type="text" class="admin-input" placeholder="ej. v5.3.0"></div>
+                            <div><label class="admin-label">Fecha</label><input type="date" class="admin-input"></div>
+                            <div style="grid-column: span 2;"><label class="admin-label">Novedades (Markdown soportado)</label><textarea class="admin-input" rows="4" placeholder="- Nueva función X..."></textarea></div>
+                            <div style="grid-column: span 2;"><button type="submit" class="admin-submit">Publicar en Web Pública</button></div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- TAB 5: SETTINGS -->
+                <div id="tab-settings" class="admin-tab-content">
+                    <div class="dash-panel">
+                        <div class="dash-panel-head"><div class="dash-panel-title">Seguridad de la Plataforma</div></div>
+                        <form onsubmit="event.preventDefault(); alert('Claves actualizadas');" class="admin-form-grid">
+                            <div><label class="admin-label">Nueva Clave Catálogo Privado</label><input type="password" class="admin-input" placeholder="********"></div>
+                            <div><label class="admin-label">Nueva Clave Administrador</label><input type="password" class="admin-input" placeholder="********"></div>
+                            <div style="grid-column: span 2;"><button type="submit" class="admin-submit">Actualizar Credenciales</button></div>
+                        </form>
+                    </div>
+                </div>
+
+            </div> <!-- End Scroll -->
+        </div>
+    </div>
+
+
+    <!-- ==========================================================================
+         LÓGICA JAVASCRIPT (SPA, Router, Físicas, Gráficos)
+         ========================================================================== -->
+    <script>
+        // ════════════════════════════════════════════════════════════
+        // TRACKVERSE HUB · SPA con drawer + catálogo + admin + reseñas
+        // ════════════════════════════════════════════════════════════
+
+        var HUB_CONFIG = null;
+        var HUB_APPS = [];
+        var HUB_RELEASES_CACHE = {};
+        var HUB_PASSWORD = 'TrackVerse2026';
+        var EDITING_APP = null;
+        var _selectedStars = 0;
+
+        const app = {
+            navigate: function(viewId) {
+                document.querySelectorAll('.app-view').forEach(v => {
+                    v.classList.remove('active');
+                    setTimeout(() => { if(!v.classList.contains('active')) v.style.display = 'none'; }, 600);
+                });
+                window.scrollTo(0,0);
+                closeDrawer();
+
+                var el = document.getElementById('view-' + viewId);
+                if(!el){
+                    el = document.getElementById('view-inicio');
+                    viewId = 'inicio';
+                }
+                el.style.display = 'block';
+                setTimeout(() => el.classList.add('active'), 50);
+
+                if(['inicio','apps','reviews','downloads','info'].indexOf(viewId) !== -1){
+                    app.initScrollReveal();
+                }
+                if(viewId === 'reviews') renderReviews();
+                if(viewId === 'downloads') renderDownloads();
+                if(viewId === 'private-catalog') renderPrivateCatalog();
+                if(viewId === 'admin-dashboard'){ app.renderAdminApps(); app.renderChart(); }
+            },
+
+            login: function(e, type) {
+                e.preventDefault();
+                var pwd;
+                if(type === 'catalog') {
+                    pwd = document.getElementById('cat-pwd').value;
+                    if(pwd === HUB_PASSWORD) app.navigate('private-catalog');
+                    else document.getElementById('cat-error').style.display = 'block';
+                }
+                else if(type === 'admin') {
+                    pwd = document.getElementById('adm-pwd').value;
+                    if(pwd === HUB_PASSWORD) app.navigate('admin-dashboard');
+                    else document.getElementById('adm-error').style.display = 'block';
+                }
+            },
+
+            switchAdminTab: function(tabId, ev) {
+                document.querySelectorAll('.admin-nav-item').forEach(el => el.classList.remove('active'));
+                if(ev && ev.currentTarget) ev.currentTarget.classList.add('active');
+                document.querySelectorAll('.admin-tab-content').forEach(el => el.classList.remove('active'));
+                var tab = document.getElementById('tab-' + tabId);
+                if(tab) tab.classList.add('active');
+                if(tabId === 'dash') setTimeout(app.renderChart, 100);
+                var sidebar = document.getElementById('admin-sidebar');
+                if(sidebar) sidebar.classList.remove('open');
+            },
+
+            renderChart: function() {
+                var chartBox = document.getElementById('sim-chart');
+                if(!chartBox) return;
+                chartBox.innerHTML = '';
+                var days = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
+                var values = [30, 50, 45, 80, 60, 90, 75];
+                days.forEach(function(day, i) {
+                    var group = document.createElement('div');
+                    group.className = 'chart-bar-group';
+                    var wrap = document.createElement('div');
+                    wrap.className = 'chart-bar-wrap';
+                    var bar = document.createElement('div');
+                    bar.className = 'chart-bar';
+                    var label = document.createElement('div');
+                    label.className = 'chart-label';
+                    label.innerText = day;
+                    wrap.appendChild(bar);
+                    group.appendChild(wrap);
+                    group.appendChild(label);
+                    chartBox.appendChild(group);
+                    setTimeout(function(){ bar.style.height = values[i] + '%'; }, 100 * i);
+                });
+            },
+
+            initScrollReveal: function() {
+                var observer = new IntersectionObserver(function(entries) {
+                    entries.forEach(function(entry) {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('active');
+                            if(entry.target.classList.contains('stats-banner') && !entry.target.dataset.animated) {
+                                entry.target.dataset.animated = 'true';
+                                entry.target.querySelectorAll('.stat-num').forEach(function(stat) {
+                                    var target = +stat.getAttribute('data-target');
+                                    var current = 0;
+                                    var update = function() {
+                                        current += target / 60;
+                                        if(current < target) {
+                                            stat.innerText = Math.ceil(current);
+                                            requestAnimationFrame(update);
+                                        } else stat.innerText = target;
+                                    };
+                                    update();
+                                });
+                            }
+                        }
+                    });
+                }, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" });
+                document.querySelectorAll('.reveal').forEach(function(el){ observer.observe(el); });
+            },
+
+            renderAdminApps: function() {
+                var tbody = document.getElementById('admin-apps-tbody');
+                if(!tbody) return;
+                if(HUB_APPS.length === 0){
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--text-secondary)">No hay apps.</td></tr>';
+                    return;
+                }
+                var html = '';
+                HUB_APPS.forEach(function(a) {
+                    var releases = HUB_RELEASES_CACHE[a.id] || [];
+                    var latest = releases[0];
+                    var versionTxt = latest ? latest.tag : '—';
+                    var downloads = 0;
+                    releases.forEach(function(r){ downloads += r.downloads || 0; });
+                    var estado = latest ? '<span class="status-badge status-active">Estable</span>' : '<span class="status-badge" style="background:#333;color:#aaa">Sin release</span>';
+                    html += '<tr><td><strong>' + escapeHtml(a.nombre) + '</strong></td><td>' + escapeHtml(versionTxt) + '</td><td>' + estado + '</td><td>' + formatNum(downloads) + '</td><td class="table-actions"><button class="btn-action" onclick="editarApp(\'' + a.id + '\')"><i class="fa-solid fa-pen"></i></button><button class="btn-action danger" onclick="eliminarApp(\'' + a.id + '\')"><i class="fa-solid fa-trash"></i></button></td></tr>';
+                });
+                tbody.innerHTML = html;
+            }
+        };
+
+        // ─── DRAWER ──────────────────────────────────────────────
+        function toggleDrawer() {
+            var drawer = document.getElementById('drawer');
+            var overlay = document.getElementById('drawer-overlay');
+            if(drawer.classList.contains('open')){ closeDrawer(); }
+            else { drawer.classList.add('open'); overlay.classList.add('show'); document.body.style.overflow = 'hidden'; }
+        }
+        function closeDrawer() {
+            document.getElementById('drawer').classList.remove('open');
+            document.getElementById('drawer-overlay').classList.remove('show');
+            document.body.style.overflow = '';
+        }
+        document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeDrawer(); });
+
+        // ─── CARGA CONFIG ────────────────────────────────────────
+        function cargarConfig() {
+            fetch('apps.json?nocache=' + Date.now())
+                .then(function(r){
+                    if(!r.ok) throw new Error('apps.json no encontrado (HTTP ' + r.status + ')');
+                    var ct = r.headers.get('content-type') || '';
+                    if(ct.indexOf('json') === -1) throw new Error('apps.json no es JSON (probablemente lo abriste como archivo local; en GitHub Pages / APK sí cargará)');
+                    return r.json();
+                })
+                .then(function(data) {
+                    HUB_CONFIG = data.config;
+                    HUB_APPS = (data.apps || []).filter(function(a){ return a.visible; });
+                    HUB_PASSWORD = (HUB_CONFIG && HUB_CONFIG.password) || 'TrackVerse2026';
+                    var promises = HUB_APPS.map(function(a){
+                        return fetchReleases(a).then(function(rel){ HUB_RELEASES_CACHE[a.id] = rel; });
+                    });
+                    return Promise.all(promises);
+                })
+                .then(function(){ console.log('✅ Config cargada'); })
+                .catch(function(err){ console.log('ℹ️ apps.json no cargado (esto es normal en local, jala en GitHub Pages/APK):', err.message); });
+        }
+
+        // ─── GITHUB API ──────────────────────────────────────────
+        function fetchReleases(appData) {
+            return fetch('https://api.github.com/repos/' + appData.repo + '/releases?per_page=50', { headers: { 'Accept': 'application/vnd.github+json' } })
+                .then(function(r){ if(!r.ok) throw new Error('API'); return r.json(); })
+                .then(function(rels){
+                    return rels.filter(function(r){ return r.assets && r.assets.length > 0; }).map(function(r){
+                        var apk = r.assets[0];
+                        return { id: r.id, tag: r.tag_name, name: r.name || r.tag_name, date: r.published_at, size: apk.size, url: apk.browser_download_url, downloads: apk.download_count, notes: r.body || '' };
+                    });
+                })
+                .catch(function(){ return []; });
+        }
+
+        function descargarAPK(appId, releaseId, btn) {
+            var rels = HUB_RELEASES_CACHE[appId] || [];
+            var rel = rels.filter(function(r){ return r.id === releaseId; })[0];
+            if(!rel){ alert('Versión no encontrada'); return; }
+            if(btn){ var orig = btn.innerHTML; btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Descargando...'; btn.disabled = true; setTimeout(function(){ btn.innerHTML = orig; btn.disabled = false; }, 2000); }
+            window.open(rel.url, '_blank');
+        }
+
+        // ─── TERMINAL VERDE (DOWNLOADS) ──────────────────────────
+        function renderDownloads() {
+            var cont = document.getElementById('terminal-apps-list');
+            if(!cont) return;
+            if(HUB_APPS.length === 0){ cont.innerHTML = '<div style="text-align:center;padding:2rem;color:#00FF41;opacity:0.5;">> No hay binarios disponibles.</div>'; return; }
+            var html = '';
+            HUB_APPS.forEach(function(a) {
+                var rels = HUB_RELEASES_CACHE[a.id] || [];
+                var latest = rels[0];
+                var versionTxt = latest ? latest.tag : 'Próximamente';
+                var sizeTxt = latest ? formatSize(latest.size) : '—';
+                var dateTxt = latest ? new Date(latest.date).toLocaleDateString('es-PE',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+                var notes = latest ? (latest.notes || 'Sin notas.').substring(0, 300) : 'Sin versiones publicadas aún.';
+                html += '<div class="terminal-block">';
+                html += '<div style="font-size:1.2rem;margin-bottom:0.5rem;">[' + a.icono + '] ' + escapeHtml(a.nombre) + '</div>';
+                html += '<div>> Versión: <strong>' + escapeHtml(versionTxt) + '</strong></div>';
+                html += '<div>> Tamaño: ' + sizeTxt + '</div>';
+                html += '<div>> Fecha: ' + dateTxt + '</div>';
+                html += '<div>> Novedades:</div>';
+                html += '<div style="margin-left:1rem;opacity:0.8;white-space:pre-wrap;">' + escapeHtml(notes) + '</div>';
+                if(latest) html += '<button class="terminal-btn" onclick="descargarAPK(\'' + a.id + '\',' + latest.id + ',this)">[DESCARGAR APK]</button>';
+                else html += '<div style="opacity:0.5;margin-top:0.5rem;">> Pendiente de release</div>';
+                html += '</div>';
+            });
+            cont.innerHTML = html;
+        }
+
+        // ─── CATÁLOGO PRIVADO ────────────────────────────────────
+        function renderPrivateCatalog() {
+            var grid = document.getElementById('catalog-apps-grid');
+            if(!grid) return;
+            if(HUB_APPS.length === 0){ grid.innerHTML = '<div class="cat-card" style="text-align:center;padding:40px"><p>No hay apps.</p></div>'; return; }
+            var html = '';
+            HUB_APPS.forEach(function(a) {
+                var rels = HUB_RELEASES_CACHE[a.id] || [];
+                var latest = rels[0];
+                var versionTxt = latest ? latest.tag : 'Sin versiones';
+                var dateTxt = latest ? timeAgo(new Date(latest.date).getTime()) : '—';
+                var sizeTxt = latest ? formatSize(latest.size) : '—';
+                var downloads = 0;
+                rels.forEach(function(r){ downloads += r.downloads || 0; });
+                html += '<div class="cat-card"><div class="cat-card-head"><div class="cat-card-icon" style="background:' + a.color + '22;color:' + a.color + '"><i class="' + (a.faIcon||'fa-solid fa-cube') + '"></i></div><span class="cat-ver">' + escapeHtml(versionTxt) + '</span></div><h4>' + escapeHtml(a.nombre) + '</h4><p>' + escapeHtml(a.descripcion) + '</p><div style="display:flex;gap:14px;font-size:0.7rem;color:var(--text-tertiary);margin-bottom:12px"><span>📅 ' + dateTxt + '</span><span>📦 ' + sizeTxt + '</span><span>⬇️ ' + formatNum(downloads) + '</span></div>';
+                if(latest) html += '<button class="cat-dl" onclick="descargarAPK(\'' + a.id + '\',' + latest.id + ',this)"><i class="fa-solid fa-download"></i> Obtener APK</button>';
+                else html += '<button class="cat-dl" disabled style="opacity:0.5">Próximamente</button>';
+                html += '</div>';
+            });
+            grid.innerHTML = html;
+        }
+
+        // ─── RESEÑAS ─────────────────────────────────────────────
+        function setStarInput(val) {
+            _selectedStars = val;
+            document.querySelectorAll('.star-input').forEach(function(s){
+                s.classList.toggle('active', parseInt(s.getAttribute('data-val')) <= val);
+            });
+        }
+        function agregarReview() {
+            var nombre = (document.getElementById('review-name').value || '').trim() || 'Anónimo';
+            var comentario = (document.getElementById('review-comment').value || '').trim();
+            if(!comentario){ alert('Escribí un comentario'); return; }
+            if(_selectedStars === 0){ alert('Seleccioná una calificación'); return; }
+            var reviews = JSON.parse(localStorage.getItem('trackverse-reviews') || '[]');
+            reviews.unshift({ nombre: nombre, estrellas: _selectedStars, comentario: comentario, fecha: Date.now() });
+            localStorage.setItem('trackverse-reviews', JSON.stringify(reviews));
+            document.getElementById('review-name').value = '';
+            document.getElementById('review-comment').value = '';
+            _selectedStars = 0;
+            setStarInput(0);
+            renderReviews();
+        }
+        function renderReviews() {
+            var reviews = JSON.parse(localStorage.getItem('trackverse-reviews') || '[]');
+            var list = document.getElementById('reviews-list');
+            var avg = document.getElementById('reviews-avg');
+            var avgStars = document.getElementById('reviews-avg-stars');
+            var count = document.getElementById('reviews-count');
+            if(reviews.length === 0){
+                if(list) list.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-secondary);">Sé el primero en dejar una reseña ⭐</div>';
+                if(avg) avg.textContent = '0.0';
+                if(avgStars) avgStars.textContent = '★★★★★';
+                if(avgStars) avgStars.style.color = 'rgba(255,255,255,0.1)';
+                if(count) count.textContent = '0 reseñas';
+                return;
+            }
+            var total = 0;
+            reviews.forEach(function(r){ total += r.estrellas; });
+            var prom = (total / reviews.length).toFixed(1);
+            if(avg) avg.textContent = prom;
+            if(avgStars) avgStars.textContent = '★★★★★'.substring(0, Math.round(prom)) + '☆☆☆☆☆'.substring(0, 5 - Math.round(prom));
+            if(avgStars) avgStars.style.color = '#fbbf24';
+            if(count) count.textContent = reviews.length + ' reseña' + (reviews.length > 1 ? 's' : '');
+            var html = '';
+            reviews.forEach(function(r) {
+                var stars = '★'.repeat(r.estrellas) + '☆'.repeat(5 - r.estrellas);
+                var fecha = new Date(r.fecha).toLocaleDateString('es-PE',{day:'2-digit',month:'short',year:'numeric'});
+                html += '<div class="review-card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;"><strong>' + escapeHtml(r.nombre) + '</strong><span style="color:#fbbf24;">' + stars + '</span></div><p style="color:var(--text-secondary);font-size:0.9rem;">' + escapeHtml(r.comentario) + '</p><div style="font-size:0.7rem;color:var(--text-tertiary);margin-top:0.5rem;">' + fecha + '</div></div>';
+            });
+            if(list) list.innerHTML = html;
+        }
+
+        // ─── ADMIN CRUD ──────────────────────────────────────────
+        function editarApp(appId) {
+            var a = HUB_APPS.filter(function(x){ return x.id === appId; })[0];
+            if(!a) return;
+            EDITING_APP = a;
+            document.getElementById('form-app-nombre').value = a.nombre;
+            document.getElementById('form-app-icono').value = a.faIcon || '';
+            document.getElementById('form-app-color').value = a.color;
+            document.getElementById('form-app-repo').value = a.repo;
+            document.getElementById('form-app-desc').value = a.descripcion;
+            document.getElementById('form-app-categoria').value = a.categoria || '';
+            document.getElementById('form-app-id').value = a.id;
+            document.getElementById('form-app-title').textContent = 'Editar App';
+            document.getElementById('form-app-modal').style.display = 'flex';
+        }
+        function abrirModalNuevaApp() {
+            EDITING_APP = null;
+            ['form-app-nombre','form-app-icono','form-app-repo','form-app-desc','form-app-id'].forEach(function(id){ document.getElementById(id).value = ''; });
+            document.getElementById('form-app-color').value = '#0ea5e9';
+            document.getElementById('form-app-categoria').value = 'General';
+            document.getElementById('form-app-title').textContent = 'Agregar Nueva App';
+            document.getElementById('form-app-modal').style.display = 'flex';
+        }
+        function cerrarModalApp() { document.getElementById('form-app-modal').style.display = 'none'; }
+        function guardarAppForm() {
+            var nombre = document.getElementById('form-app-nombre').value.trim();
+            var icono = document.getElementById('form-app-icono').value.trim();
+            var color = document.getElementById('form-app-color').value;
+            var repo = document.getElementById('form-app-repo').value.trim();
+            var desc = document.getElementById('form-app-desc').value.trim();
+            var cat = document.getElementById('form-app-categoria').value.trim() || 'General';
+            var id = document.getElementById('form-app-id').value.trim() || slugify(nombre);
+            if(!nombre || !repo){ alert('Falta nombre o repo'); return; }
+            var datos = { id: id, nombre: nombre, icono: '📦', faIcon: icono, color: color, repo: repo, descripcion: desc, categoria: cat, visible: true, android_min: '7.0', pais: 'Perú' };
+            if(EDITING_APP){
+                var idx = HUB_APPS.findIndex(function(x){ return x.id === EDITING_APP.id; });
+                if(idx !== -1) HUB_APPS[idx] = datos;
+            } else {
+                if(HUB_APPS.some(function(x){ return x.id === id; })){ alert('Ya existe una app con ese ID'); return; }
+                HUB_APPS.push(datos);
+            }
+            guardarEnRepo(EDITING_APP ? 'App actualizada: ' + nombre : 'App agregada: ' + nombre, function(ok){
+                cerrarModalApp();
+                if(ok){ alert('✅ Guardado. Recargando...'); setTimeout(function(){ location.reload(); }, 800); }
+                else { alert('⚠️ Guardado local. Configurá el token.'); app.renderAdminApps(); }
+            });
+        }
+        function eliminarApp(appId) {
+            var a = HUB_APPS.filter(function(x){ return x.id === appId; })[0];
+            if(!a) return;
+            if(!confirm('¿Eliminar "' + a.nombre + '"?')) return;
+            HUB_APPS = HUB_APPS.filter(function(x){ return x.id !== appId; });
+            guardarEnRepo('App eliminada: ' + a.nombre, function(ok){
+                if(ok){ alert('✅ Eliminada. Recargando...'); setTimeout(function(){ location.reload(); }, 800); }
+                else app.renderAdminApps();
+            });
+        }
+        function guardarEnRepo(mensaje, cb) {
+            var token = localStorage.getItem('hub-github-token');
+            if(!token){ if(cb) cb(false); return; }
+            var owner = (HUB_CONFIG && HUB_CONFIG.owner) || 'RiderTrack';
+            var url = 'https://api.github.com/repos/' + owner + '/trackverse-hub/contents/apps.json';
+            fetch(url, { headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github+json' } })
+                .then(function(r){ return r.json(); })
+                .then(function(data){
+                    var content = btoa(unescape(encodeURIComponent(JSON.stringify({ config: HUB_CONFIG, apps: HUB_APPS }, null, 2))));
+                    return fetch(url, { method: 'PUT', headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' }, body: JSON.stringify({ message: mensaje, content: content, sha: data.sha }) });
+                })
+                .then(function(){ if(cb) cb(true); })
+                .catch(function(){ if(cb) cb(false); });
+        }
+        function guardarPasswords() {
+            var pwd = document.getElementById('set-pwd-catalog').value.trim();
+            if(!pwd){ alert('Ingresá un password'); return; }
+            if(!HUB_CONFIG) HUB_CONFIG = {};
+            HUB_CONFIG.password = pwd;
+            guardarEnRepo('Password actualizado', function(ok){ if(ok){ HUB_PASSWORD = pwd; alert('✅ Password actualizado'); } else alert('⚠️ Configurá el token.'); });
+        }
+        function guardarToken() {
+            var token = document.getElementById('set-github-token').value.trim();
+            if(!token || token.length < 20){ alert('Token inválido'); return; }
+            localStorage.setItem('hub-github-token', token);
+            alert('✅ Token guardado');
+        }
+
+        // ─── HELPERS ─────────────────────────────────────────────
+        function slugify(s){ return s.toLowerCase().trim().replace(/[^\w\s-]/g,'').replace(/[\s_-]+/g,'-').replace(/^-+|-+$/g,''); }
+        function escapeHtml(s){ if(s===null||s===undefined) return ''; return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]; }); }
+        function formatNum(n){ if(n>=1000000) return (n/1000000).toFixed(1)+'M'; if(n>=1000) return (n/1000).toFixed(1)+'K'; return (n||0).toString(); }
+        function formatSize(b){ if(!b) return '—'; if(b<1024) return b+' B'; if(b<1048576) return (b/1024).toFixed(1)+' KB'; return (b/1048576).toFixed(1)+' MB'; }
+        function timeAgo(ts){ if(!ts) return '—'; var d=Date.now()-ts; if(d<3600000) return 'hace '+Math.floor(d/60000)+' min'; if(d<86400000) return 'hace '+Math.floor(d/3600000)+' h'; if(d<604800000) return 'hace '+Math.floor(d/86400000)+' d'; return new Date(ts).toLocaleDateString('es-PE',{day:'2-digit',month:'short'}); }
+
+        function simularAPK(btn) {
+            if(btn.classList.contains('loading') || btn.classList.contains('success')) return;
+            var originalText = btn.innerHTML;
+            btn.classList.add('loading');
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Solicitando Binario...';
+            setTimeout(function() {
+                btn.classList.remove('loading');
+                btn.classList.add('success');
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Descarga Iniciada';
+                setTimeout(function(){ btn.classList.remove('success'); btn.innerHTML = originalText; }, 3000);
+            }, 1500);
+        }
+
+        // ─── DOMContentLoaded ────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', function() {
+            var yearEl = document.getElementById('year');
+            if(yearEl) yearEl.textContent = new Date().getFullYear();
+
+            cargarConfig();
+
+            // SPLASH
+            var words = [document.getElementById('sw-1'), document.getElementById('sw-2'), document.getElementById('sw-3'), document.getElementById('sw-4'), document.getElementById('sw-5'), document.getElementById('sw-6')];
+            var bar = document.getElementById('splash-bar');
+            var cw = 0;
+            function nextSplash() {
+                if (cw > 0 && cw < words.length - 1) { words[cw - 1].classList.remove('active'); words[cw - 1].classList.add('exit'); }
+                if (cw < words.length - 1) {
+                    words[cw].classList.add('active');
+                    bar.style.width = ((cw + 1) / (words.length - 1)) * 100 + '%';
+                    cw++;
+                    setTimeout(nextSplash, 600);
+                } else {
+                    words[cw - 1].classList.remove('active'); words[cw - 1].classList.add('exit');
+                    words[cw].classList.add('active');
+                    bar.style.width = '100%';
+                    document.getElementById('splash-shields').classList.add('show');
+                    setTimeout(function(){ app.navigate('inicio'); }, 1800);
+                }
+            }
+            setTimeout(nextSplash, 500);
+
+            // NAVBAR SCROLL
+            var lastScroll = 0;
+            window.addEventListener('scroll', function() {
+                var activeView = document.querySelector('.app-view.active');
+                if(activeView && activeView.querySelector('.public-nav-wrapper')) {
+                    var nav = activeView.querySelector('.public-nav-wrapper');
+                    var currentScroll = window.pageYOffset;
+                    if (currentScroll > 50 && currentScroll > lastScroll) nav.classList.add('hidden');
+                    else nav.classList.remove('hidden');
+                    lastScroll = currentScroll;
+                }
+            });
+
+            // CANVAS ESTRELLAS + FUGACES + GALAXIA
+            var canvas = document.getElementById('particle-canvas');
+            if(canvas){
+                var ctx = canvas.getContext('2d');
+                var stars = [];
+                var shootingStars = [];
+                var galaxyAngle = 0;
+                function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+                window.addEventListener('resize', function(){ resizeCanvas(); createStars(); });
+                resizeCanvas();
+                function createStars() {
+                    stars = [];
+                    var count = Math.floor((canvas.width * canvas.height) / 6000);
+                    if(count > 300) count = 300; if(count < 100) count = 100;
+                    for(var i = 0; i < count; i++){
+                        stars.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, radius: Math.random()*1.5+0.3, baseOpacity: Math.random()*0.4+0.3, twinkleSpeed: Math.random()*0.04+0.01, twinklePhase: Math.random()*Math.PI*2, twinkleAmp: Math.random()*0.4+0.3, color: Math.random()>0.85?'rgba(180,200,255':(Math.random()>0.7?'rgba(255,240,220':'rgba(255,255,255') });
+                    }
+                }
+                createStars();
+                function spawnShootingStar() {
+                    shootingStars.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height*0.5, vx: Math.cos(Math.PI/4+(Math.random()-0.5)*0.4)*(6+Math.random()*6), vy: Math.sin(Math.PI/4+(Math.random()-0.5)*0.4)*(6+Math.random()*6), life: 1.0, decay: 0.015+Math.random()*0.01, trail: [], maxTrail: 18 });
+                }
+                function scheduleShootingStar() {
+                    setTimeout(function(){ spawnShootingStar(); if(Math.random()>0.7) setTimeout(spawnShootingStar,400); scheduleShootingStar(); }, 3000+Math.random()*7000);
+                }
+                scheduleShootingStar();
+                function drawGalaxy() {
+                    galaxyAngle += 0.0008;
+                    var cx = canvas.width*0.75, cy = canvas.height*0.3;
+                    var radius = Math.min(canvas.width,canvas.height)*0.35;
+                    for(var i=0; i<3; i++){
+                        var angle = galaxyAngle+(i*Math.PI*2/3);
+                        var ox = Math.cos(angle)*radius*0.3, oy = Math.sin(angle)*radius*0.3;
+                        var grad = ctx.createRadialGradient(cx+ox,cy+oy,0,cx+ox,cy+oy,radius);
+                        var cols = [['rgba(139,92,246,0.06)','rgba(139,92,246,0)'],['rgba(14,165,233,0.05)','rgba(14,165,233,0)'],['rgba(236,72,153,0.04)','rgba(236,72,153,0)']][i];
+                        grad.addColorStop(0,cols[0]); grad.addColorStop(1,cols[1]);
+                        ctx.fillStyle = grad; ctx.fillRect(0,0,canvas.width,canvas.height);
+                    }
+                    var core = ctx.createRadialGradient(cx,cy,0,cx,cy,radius*0.4);
+                    core.addColorStop(0,'rgba(255,240,220,0.08)'); core.addColorStop(0.5,'rgba(255,200,180,0.03)'); core.addColorStop(1,'rgba(255,240,220,0)');
+                    ctx.fillStyle = core; ctx.fillRect(0,0,canvas.width,canvas.height);
+                }
+                function animate() {
+                    ctx.clearRect(0,0,canvas.width,canvas.height);
+                    drawGalaxy();
+                    for(var i=0; i<stars.length; i++){
+                        var s = stars[i]; s.twinklePhase += s.twinkleSpeed;
+                        var op = s.baseOpacity+Math.sin(s.twinklePhase)*s.twinkleAmp;
+                        if(op<0.05) op=0.05; if(op>1) op=1;
+                        ctx.beginPath(); ctx.arc(s.x,s.y,s.radius,0,Math.PI*2); ctx.fillStyle = s.color+','+op+')'; ctx.fill();
+                        if(s.radius>1){ ctx.beginPath(); ctx.arc(s.x,s.y,s.radius*2.8,0,Math.PI*2); ctx.fillStyle = s.color+','+(op*0.18)+')'; ctx.fill(); }
+                    }
+                    for(var j=shootingStars.length-1; j>=0; j--){
+                        var sh = shootingStars[j]; sh.trail.push({x:sh.x,y:sh.y}); if(sh.trail.length>sh.maxTrail) sh.trail.shift();
+                        sh.x += sh.vx; sh.y += sh.vy; sh.life -= sh.decay;
+                        if(sh.trail.length>1){
+                            for(var k=0; k<sh.trail.length-1; k++){
+                                var t=sh.trail[k], tn=sh.trail[k+1];
+                                ctx.beginPath(); ctx.moveTo(t.x,t.y); ctx.lineTo(tn.x,tn.y);
+                                ctx.strokeStyle='rgba(255,255,255,'+((k/sh.trail.length)*sh.life*0.8)+')'; ctx.lineWidth=(k/sh.trail.length)*2; ctx.stroke();
+                            }
+                        }
+                        ctx.beginPath(); ctx.arc(sh.x,sh.y,2,0,Math.PI*2); ctx.fillStyle='rgba(255,255,255,'+sh.life+')'; ctx.fill();
+                        if(sh.life<=0||sh.x>canvas.width+50||sh.y>canvas.height+50) shootingStars.splice(j,1);
+                    }
+                    requestAnimationFrame(animate);
+                }
+                animate();
+            }
+        });
+    </script>
+</body>
+</html>
+
+
