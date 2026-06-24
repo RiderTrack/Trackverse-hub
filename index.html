@@ -523,6 +523,131 @@
             .bento-grid { max-width: 1500px; }
             .ai-grid { max-width: 1500px; }
         }
+
+        /* ==========================================================================
+           STAR WARS CHANGELOG (efecto scroll 3D)
+           ========================================================================== */
+        .sw-container {
+            position: relative;
+            height: 400px;
+            overflow: hidden;
+            background: #000;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.08);
+            perspective: 400px;
+            cursor: pointer;
+        }
+        .sw-container::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 60px;
+            background: linear-gradient(to bottom, #000, transparent);
+            z-index: 2;
+            pointer-events: none;
+        }
+        .sw-container::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0; height: 60px;
+            background: linear-gradient(to top, #000, transparent);
+            z-index: 2;
+            pointer-events: none;
+        }
+        .sw-content {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%) rotateX(25deg);
+            transform-origin: 50% 100%;
+            width: 80%;
+            max-width: 500px;
+            animation: swScroll 60s linear infinite;
+        }
+        .sw-container.paused .sw-content {
+            animation-play-state: paused;
+        }
+        @keyframes swScroll {
+            0% { top: 100%; }
+            100% { top: -200%; }
+        }
+        .sw-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+        }
+        .sw-card-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .sw-card-tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 1rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
+        }
+        .sw-card-date {
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+        }
+        .sw-card-app {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+        .sw-card-section {
+            font-size: 0.8rem;
+            margin: 0.5rem 0 0.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .sw-card-section.new { color: var(--brand-rider); }
+        .sw-card-section.fix { color: var(--brand-admin); }
+        .sw-card-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 0.5rem 0;
+        }
+        .sw-card-list li {
+            color: var(--text-secondary);
+            font-size: 0.78rem;
+            line-height: 1.6;
+            padding-left: 1rem;
+            position: relative;
+        }
+        .sw-card-list li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: var(--text-tertiary);
+        }
+
+        /* ==========================================================================
+           TUTORIALES ADMIN
+           ========================================================================== */
+        .tut-admin-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+        }
+        .tut-admin-card input, .tut-admin-card textarea {
+            width: 100%;
+            background: var(--bg-base);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: #fff;
+            padding: 0.5rem 0.8rem;
+            font-family: inherit;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+        }
     </style>
 </head>
 <body>
@@ -568,7 +693,7 @@
             <div class="drawer-item" onclick="app.navigate('inicio')"><i class="fa-solid fa-house"></i> Inicio</div>
             <div class="drawer-item" onclick="app.navigate('apps')"><i class="fa-solid fa-cube"></i> Apps</div>
             <div class="drawer-item" onclick="app.navigate('reviews')"><i class="fa-solid fa-star"></i> Reseñas</div>
-            <div class="drawer-item" onclick="app.navigate('downloads')"><i class="fa-solid fa-download"></i> Descargas</div>
+            <div class="drawer-item" onclick="app.navigate('experiencia')"><i class="fa-solid fa-wand-magic-sparkles"></i> Experiencia</div>
             <div class="drawer-item" onclick="app.navigate('info')"><i class="fa-solid fa-circle-info"></i> Info & Stack</div>
             <div class="drawer-section-label">ACCESO RESTRINGIDO</div>
             <div class="drawer-item" onclick="app.navigate('catalog-auth')"><i class="fa-solid fa-lock"></i> Catálogo VIP</div>
@@ -606,7 +731,7 @@
             
             <div class="hero-actions reveal" style="transition-delay: 0.3s;">
                 <button class="btn-large primary" onclick="app.navigate('apps')"><i class="fa-solid fa-compass"></i> Explorar Ecosistema</button>
-                <button class="btn-large secondary" onclick="app.navigate('downloads')"><i class="fa-brands fa-android"></i> Descargar Apps</button>
+                <button class="btn-large secondary" onclick="app.navigate('info')"><i class="fa-brands fa-android"></i> Descargar Apps</button>
             </div>
 
             <div class="hero-shields-3d reveal" style="transition-delay: 0.4s;">
@@ -849,9 +974,9 @@
     <!-- ==========================================================================
          VISTA 5: DOWNLOADS (Terminal Verde)
          ========================================================================== -->
-    <div id="view-downloads" class="app-view">
-        <!-- Navbar de Downloads -->
-        <div class="public-nav-wrapper" id="downloads-navbar">
+    <div id="view-experiencia" class="app-view">
+        <!-- Navbar -->
+        <div class="public-nav-wrapper" id="experiencia-navbar">
             <nav class="public-nav">
                 <button class="hamburger-btn" onclick="toggleDrawer()" aria-label="Abrir menú"><i class="fa-solid fa-bars"></i></button>
                 <div class="nav-brand">TRACKVERSE</div>
@@ -862,20 +987,117 @@
             </nav>
         </div>
 
-        <section class="terminal-section" style="min-height:100vh;padding:8rem 2rem 4rem;">
-            <div style="max-width:900px;margin:0 auto;">
-                <div style="font-size:1.5rem;color:#00FF41;margin-bottom:2rem;border-bottom:1px solid rgba(0,255,65,0.3);padding-bottom:1rem;">
-                    > trackverse://downloads<span class="term-cursor">_</span>
+        <!-- STATS EN VIVO -->
+        <section class="pub-section" style="padding-top:6rem;">
+            <div class="sec-header reveal">
+                <span class="sec-badge"><i class="fa-solid fa-chart-line"></i> Tiempo Real</span>
+                <h2 class="sec-title">Estadísticas en Vivo.</h2>
+                <p class="sec-desc">Datos actualizados desde GitHub en tiempo real.</p>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.5rem;max-width:1200px;margin:0 auto;">
+                <div class="bento-card reveal" style="padding:2rem;text-align:center;align-items:center;">
+                    <div style="font-size:3rem;font-weight:900;color:var(--brand-rider);" id="exp-stat-apps">0</div>
+                    <div style="color:var(--text-secondary);font-size:0.85rem;text-transform:uppercase;letter-spacing:1px;">📱 Apps</div>
                 </div>
-                <div id="terminal-apps-list" style="font-family:'JetBrains Mono',monospace;">
-                    <div style="text-align:center;padding:3rem;color:#00FF41;opacity:0.5;">
-                        <i class="fa-solid fa-circle-notch fa-spin" style="font-size:2rem;"></i>
-                        <p style="margin-top:1rem;">Cargando binarios...</p>
+                <div class="bento-card reveal delay-1" style="padding:2rem;text-align:center;align-items:center;">
+                    <div style="font-size:3rem;font-weight:900;color:var(--brand-fit);" id="exp-stat-versions">0</div>
+                    <div style="color:var(--text-secondary);font-size:0.85rem;text-transform:uppercase;letter-spacing:1px;">📦 Versiones</div>
+                </div>
+                <div class="bento-card reveal" style="padding:2rem;text-align:center;align-items:center;">
+                    <div style="font-size:3rem;font-weight:900;color:var(--brand-health);" id="exp-stat-downloads">0</div>
+                    <div style="color:var(--text-secondary);font-size:0.85rem;text-transform:uppercase;letter-spacing:1px;">⬇️ Descargas</div>
+                </div>
+                <div class="bento-card reveal delay-1" style="padding:2rem;text-align:center;align-items:center;">
+                    <div style="font-size:3rem;font-weight:900;color:var(--brand-wallet);" id="exp-stat-reviews">0</div>
+                    <div style="color:var(--text-secondary);font-size:0.85rem;text-transform:uppercase;letter-spacing:1px;">⭐ Reseñas</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- GALERÍA VISUAL -->
+        <section class="pub-section" style="background:rgba(10,10,12,0.8);">
+            <div class="sec-header reveal">
+                <span class="sec-badge"><i class="fa-solid fa-images"></i> Galería</span>
+                <h2 class="sec-title">Galería Visual.</h2>
+                <p class="sec-desc">Mirá cómo se ven nuestras aplicaciones.</p>
+            </div>
+            <div id="exp-gallery" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:2rem;max-width:1200px;margin:0 auto;">
+                <!-- Generado por JS -->
+            </div>
+        </section>
+
+        <!-- TUTORIALES -->
+        <section class="pub-section">
+            <div class="sec-header reveal">
+                <span class="sec-badge"><i class="fa-solid fa-graduation-cap"></i> Aprende</span>
+                <h2 class="sec-title">Tutoriales.</h2>
+                <p class="sec-desc">Aprendé a usar cada función de las apps.</p>
+            </div>
+            <div id="exp-tutorials" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(350px,1fr));gap:1.5rem;max-width:1200px;margin:0 auto;">
+                <!-- Generado por JS -->
+            </div>
+        </section>
+
+        <!-- CHANGELOG STAR WARS en Experiencia -->
+        <section class="pub-section" style="background:rgba(10,10,12,0.8);">
+            <div class="sec-header reveal">
+                <span class="sec-badge"><i class="fa-solid fa-code-commit"></i> Actualizaciones</span>
+                <h2 class="sec-title">Últimas Versiones.</h2>
+                <p class="sec-desc">Las actualizaciones más recientes de todo el ecosistema. Tocá para pausar.</p>
+            </div>
+            <div style="max-width:600px;margin:0 auto;">
+                <div class="sw-container" id="exp-sw-container" onclick="this.classList.toggle('paused')">
+                    <div class="sw-content" id="exp-sw-content">
+                        <div style="text-align:center;color:var(--text-tertiary);font-size:0.85rem;padding:2rem;">Cargando...</div>
                     </div>
                 </div>
             </div>
         </section>
-    </div> <!-- Fin View Downloads -->
+
+        <!-- DEMO INTERACTIVA -->
+        <section class="pub-section" style="background:rgba(10,10,12,0.8);">
+            <div class="sec-header reveal">
+                <span class="sec-badge"><i class="fa-solid fa-wand-magic-sparkles"></i> Probá</span>
+                <h2 class="sec-title">Demo Interactiva.</h2>
+                <p class="sec-desc">Probá algunas funciones sin instalar nada.</p>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:2rem;max-width:1200px;margin:0 auto;">
+                <!-- Demo: Cronómetro -->
+                <div class="bento-card reveal" style="padding:2rem;text-align:center;">
+                    <div class="bento-icon" style="margin:0 auto 1rem;color:var(--brand-rider);"><i class="fa-solid fa-stopwatch"></i></div>
+                    <h3 style="margin-bottom:1rem;">Cronómetro</h3>
+                    <div id="demo-crono" style="font-family:'JetBrains Mono';font-size:2.5rem;font-weight:700;color:var(--brand-rider);margin-bottom:1rem;">00:00:00</div>
+                    <button onclick="demoToggleCrono()" id="demo-crono-btn" style="background:var(--brand-rider);color:#fff;border:none;padding:0.6rem 1.5rem;border-radius:8px;font-weight:700;cursor:pointer;width:100%;">▶ Iniciar</button>
+                </div>
+                <!-- Demo: Selector de Estados -->
+                <div class="bento-card reveal delay-1" style="padding:2rem;text-align:center;">
+                    <div class="bento-icon" style="margin:0 auto 1rem;color:var(--brand-health);"><i class="fa-solid fa-circle-check"></i></div>
+                    <h3 style="margin-bottom:1rem;">Estados de Pedido</h3>
+                    <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:1rem;">Tocá un estado para ver cómo se ve:</p>
+                    <div id="demo-estados" style="display:flex;flex-wrap:wrap;gap:0.5rem;justify-content:center;margin-bottom:1rem;">
+                        <button onclick="demoSetEstado('pendiente')" style="background:rgba(255,255,255,0.05);color:var(--text-secondary);border:1px solid rgba(255,255,255,0.1);padding:0.4rem 0.8rem;border-radius:6px;font-size:0.75rem;cursor:pointer;">⏳ Pendiente</button>
+                        <button onclick="demoSetEstado('efectivo')" style="background:rgba(34,197,94,0.15);color:#22c55e;border:1px solid rgba(34,197,94,0.3);padding:0.4rem 0.8rem;border-radius:6px;font-size:0.75rem;cursor:pointer;">💵 Efectivo</button>
+                        <button onclick="demoSetEstado('fallida')" style="background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.3);padding:0.4rem 0.8rem;border-radius:6px;font-size:0.75rem;cursor:pointer;">❌ Fallida</button>
+                        <button onclick="demoSetEstado('reprogramar')" style="background:rgba(245,158,11,0.15);color:#f59e0b;border:1px solid rgba(245,158,11,0.3);padding:0.4rem 0.8rem;border-radius:6px;font-size:0.75rem;cursor:pointer;">🔄 Reprogramar</button>
+                    </div>
+                    <div id="demo-estado-result" style="padding:1rem;border-radius:8px;background:rgba(255,255,255,0.03);font-size:0.9rem;">Seleccioná un estado ↑</div>
+                </div>
+                <!-- Demo: Calificación -->
+                <div class="bento-card reveal" style="padding:2rem;text-align:center;">
+                    <div class="bento-icon" style="margin:0 auto 1rem;color:#fbbf24;"><i class="fa-solid fa-star"></i></div>
+                    <h3 style="margin-bottom:1rem;">Calificación</h3>
+                    <div id="demo-stars" style="font-size:2.5rem;cursor:pointer;letter-spacing:0.3rem;margin-bottom:1rem;">
+                        <span onclick="demoSetStars(1)" style="color:rgba(255,255,255,0.2);">★</span>
+                        <span onclick="demoSetStars(2)" style="color:rgba(255,255,255,0.2);">★</span>
+                        <span onclick="demoSetStars(3)" style="color:rgba(255,255,255,0.2);">★</span>
+                        <span onclick="demoSetStars(4)" style="color:rgba(255,255,255,0.2);">★</span>
+                        <span onclick="demoSetStars(5)" style="color:rgba(255,255,255,0.2);">★</span>
+                    </div>
+                    <div id="demo-stars-result" style="color:var(--text-secondary);font-size:0.9rem;">Tocá una estrella</div>
+                </div>
+            </div>
+        </section>
+    </div> <!-- Fin View Experiencia -->
 
     <!-- ==========================================================================
          VISTA 6: SECCIONES ADICIONALES (Changelog + Tech + Galería + Footer)
@@ -916,11 +1138,11 @@
             <div class="bento-grid" style="max-width: 1200px;">
                 
                 <div class="bento-card bento-half reveal" style="padding: 2rem;">
-                    <h3 class="bento-title" style="font-size:1.5rem; margin-bottom: 2rem;"><i class="fa-solid fa-code-commit"></i> Changelog Global</h3>
-                    <div class="changelog-box" id="info-changelog-box">
-                        <div style="text-align:center;padding:2rem;color:var(--text-secondary);font-size:0.9rem;">
-                            <i class="fa-solid fa-circle-notch fa-spin" style="font-size:1.5rem;margin-bottom:0.5rem;display:block;"></i>
-                            Cargando changelog...
+                    <h3 class="bento-title" style="font-size:1.5rem; margin-bottom: 1rem;"><i class="fa-solid fa-code-commit"></i> Changelog Global</h3>
+                    <p style="color:var(--text-tertiary);font-size:0.7rem;margin-bottom:0.8rem;text-align:center;"> tocá para pausar/reanudar</p>
+                    <div class="sw-container" id="info-sw-container" onclick="this.classList.toggle('paused')">
+                        <div class="sw-content" id="info-sw-content">
+                            <div style="text-align:center;color:var(--text-tertiary);font-size:0.85rem;padding:2rem;">Cargando...</div>
                         </div>
                     </div>
                 </div>
@@ -1342,11 +1564,11 @@
                 el.style.display = 'block';
                 setTimeout(() => el.classList.add('active'), 50);
 
-                if(['inicio','apps','reviews','downloads','info'].indexOf(viewId) !== -1){
+                if(['inicio','apps','reviews','experiencia','info'].indexOf(viewId) !== -1){
                     app.initScrollReveal();
                 }
                 if(viewId === 'reviews') renderReviews();
-                if(viewId === 'downloads') renderDownloads();
+                if(viewId === 'experiencia') renderExperiencia();
                 if(viewId === 'info') { renderInfoDownloads(); renderInfoChangelog(); }
                 if(viewId === 'private-catalog') renderPrivateCatalog();
                 if(viewId === 'admin-dashboard'){ app.renderAdminApps(); app.renderChart(); cargarChangelogSelect(); }
@@ -1533,11 +1755,10 @@
             cont.innerHTML = html;
         }
 
-        // ─── CHANGELOG GLOBAL (Info & Stack - dinámico desde GitHub) ──
+        // ─── CHANGELOG GLOBAL (Star Wars style) ──
         function renderInfoChangelog() {
-            var box = document.getElementById('info-changelog-box');
+            var box = document.getElementById('info-sw-content');
             if(!box) return;
-            // Juntar todos los releases de todas las apps, ordenar por fecha
             var allReleases = [];
             HUB_APPS.forEach(function(a) {
                 var rels = HUB_RELEASES_CACHE[a.id] || [];
@@ -1545,61 +1766,65 @@
                     allReleases.push({ app: a, rel: r, date: new Date(r.date).getTime() });
                 });
             });
-            // Ordenar por fecha descendente (más reciente primero)
             allReleases.sort(function(a, b) { return b.date - a.date; });
-            // Mostrar las últimas 8
-            var mostrados = allReleases.slice(0, 8);
+            var mostrados = allReleases.slice(0, 12);
             if(mostrados.length === 0) {
-                box.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-secondary);font-size:0.9rem;">Aún no hay versiones publicadas.</div>';
+                box.innerHTML = '<div style="text-align:center;color:var(--text-tertiary);padding:3rem;">Aún no hay versiones publicadas.</div>';
                 return;
             }
             var html = '';
+            // Título inicial estilo Star Wars
+            html += '<div style="text-align:center;margin-bottom:2rem;"><div style="font-size:1.5rem;font-weight:800;color:#fff;letter-spacing:0.1em;">TRACKVERSE</div><div style="font-size:0.8rem;color:var(--text-tertiary);margin-top:0.3rem;">CHANGELOG GLOBAL</div></div>';
             mostrados.forEach(function(item) {
                 var a = item.app;
                 var r = item.rel;
                 var dateTxt = new Date(r.date).toLocaleDateString('es-PE', { day:'2-digit', month:'short', year:'numeric' });
-                // Formatear notas: dividir por líneas, detectar novedades/correcciones
                 var notes = r.notes || 'Sin notas de versión.';
                 var lines = notes.split('\n').filter(function(l){ return l.trim(); });
                 var novedades = [];
                 var correcciones = [];
                 var otras = [];
                 lines.forEach(function(line) {
-                    var l = line.trim();
+                    var l = line.trim().replace(/^[-*•]\s*/, '');
                     if(!l) return;
-                    // Quitar markdown de inicio de lista (-, *, •)
-                    l = l.replace(/^[-*•]\s*/, '');
-                    // Detectar si es novedad o corrección
                     var lower = l.toLowerCase();
-                    if(lower.indexOf('fix') !== -1 || lower.indexOf('correcci') !== -1 || lower.indexOf('error') !== -1 || lower.indexOf('bug') !== -1) {
+                    if(lower.indexOf('fix') !== -1 || lower.indexOf('correcci') !== -1 || lower.indexOf('error') !== -1 || lower.indexOf('bug') !== -1 || lower.indexOf('✅') !== -1) {
                         correcciones.push(l);
-                    } else if(lower.indexOf('nuevo') !== -1 || lower.indexOf('nueva') !== -1 || lower.indexOf('agreg') !== -1 || lower.indexOf('mejor') !== -1) {
+                    } else if(lower.indexOf('nuevo') !== -1 || lower.indexOf('nueva') !== -1 || lower.indexOf('agreg') !== -1 || lower.indexOf('mejor') !== -1 || lower.indexOf('🆕') !== -1 || lower.indexOf('🏁') !== -1 || lower.indexOf('🕐') !== -1 || lower.indexOf('📍') !== -1 || lower.indexOf('📊') !== -1 || lower.indexOf('📋') !== -1 || lower.indexOf('💰') !== -1 || lower.indexOf('🎵') !== -1 || lower.indexOf('⏰') !== -1) {
                         novedades.push(l);
                     } else {
                         otras.push(l);
                     }
                 });
-                html += '<div class="cl-card">';
-                html += '<div class="cl-head"><span class="cl-ver" style="background:' + a.color + '22;color:' + a.color + ';">' + escapeHtml(r.tag) + '</span><span class="cl-date">' + dateTxt + ' · ' + escapeHtml(a.nombre) + '</span></div>';
-                html += '<div class="cl-list">';
+                html += '<div class="sw-card">';
+                html += '<div class="sw-card-title">';
+                html += '<span class="sw-card-tag" style="background:' + a.color + '22;color:' + a.color + ';">' + escapeHtml(r.tag) + '</span>';
+                html += '<span class="sw-card-app">' + escapeHtml(a.nombre) + '</span>';
+                html += '<span class="sw-card-date">' + dateTxt + '</span>';
+                html += '</div>';
                 if(novedades.length > 0) {
-                    html += '<h4 class="new"><i class="fa-solid fa-star"></i> Novedades</h4><ul>';
+                    html += '<div class="sw-card-section new">⭐ Novedades</div>';
+                    html += '<ul class="sw-card-list">';
                     novedades.forEach(function(n) { html += '<li>' + escapeHtml(n) + '</li>'; });
                     html += '</ul>';
                 }
                 if(correcciones.length > 0) {
-                    html += '<h4 class="fix"><i class="fa-solid fa-wrench"></i> Correcciones</h4><ul>';
+                    html += '<div class="sw-card-section fix">🔧 Correcciones</div>';
+                    html += '<ul class="sw-card-list">';
                     correcciones.forEach(function(c) { html += '<li>' + escapeHtml(c) + '</li>'; });
                     html += '</ul>';
                 }
                 if(otras.length > 0 && novedades.length === 0 && correcciones.length === 0) {
-                    html += '<ul>';
+                    html += '<ul class="sw-card-list">';
                     otras.forEach(function(o) { html += '<li>' + escapeHtml(o) + '</li>'; });
                     html += '</ul>';
                 }
-                html += '</div></div>';
+                html += '</div>';
             });
             box.innerHTML = html;
+            // Ajustar duración de la animación según cantidad
+            var dur = Math.max(30, mostrados.length * 8);
+            box.style.animation = 'swScroll ' + dur + 's linear infinite';
         }
 
         // ─── INFO & STACK DOWNLOADS (cards estilo Play Store) ───
@@ -1632,6 +1857,170 @@
             });
             grid.innerHTML = html;
             app.initScrollReveal();
+        }
+
+        // ─── EXPERIENCIA (Stats + Galería + Tutoriales + Demo) ───
+        var _demoCronoInterval = null;
+        var _demoCronoSecs = 0;
+        function renderExperiencia() {
+            // Stats
+            var totalApps = HUB_APPS.length;
+            var totalVersions = 0;
+            var totalDownloads = 0;
+            HUB_APPS.forEach(function(a) {
+                var rels = HUB_RELEASES_CACHE[a.id] || [];
+                totalVersions += rels.length;
+                rels.forEach(function(r) { totalDownloads += r.downloads || 0; });
+            });
+            var reviews = JSON.parse(localStorage.getItem('trackverse-reviews') || '[]');
+            var elApps = document.getElementById('exp-stat-apps');
+            var elVer = document.getElementById('exp-stat-versions');
+            var elDl = document.getElementById('exp-stat-downloads');
+            var elRev = document.getElementById('exp-stat-reviews');
+            if(elApps) elApps.textContent = totalApps;
+            if(elVer) elVer.textContent = totalVersions;
+            if(elDl) elDl.textContent = formatNum(totalDownloads);
+            if(elRev) elRev.textContent = reviews.length;
+            
+            // Galería
+            var gallery = document.getElementById('exp-gallery');
+            if(gallery) {
+                var gHtml = '';
+                HUB_APPS.forEach(function(a, idx) {
+                    var delay = idx % 2 === 0 ? '' : ' delay-1';
+                    gHtml += '<div class="bento-card reveal' + delay + '" style="padding:0;overflow:hidden;">';
+                    gHtml += '<div style="background:linear-gradient(135deg,' + a.color + '22,' + a.color + '05);padding:2rem;text-align:center;">';
+                    gHtml += '<div style="font-size:3rem;margin-bottom:0.5rem;"><i class="' + (a.faIcon||'fa-solid fa-cube') + '" style="color:' + a.color + ';"></i></div>';
+                    gHtml += '<h3 style="color:' + a.color + ';">' + escapeHtml(a.nombre) + '</h3>';
+                    gHtml += '<p style="color:var(--text-secondary);font-size:0.85rem;">' + escapeHtml(a.descripcion) + '</p>';
+                    gHtml += '</div>';
+                    // Mockup phone
+                    gHtml += '<div style="background:var(--bg-base);padding:1.5rem;display:flex;justify-content:center;">';
+                    gHtml += '<div style="width:180px;height:320px;background:var(--bg-surface);border-radius:24px;border:3px solid ' + a.color + '33;overflow:hidden;position:relative;">';
+                    gHtml += '<div style="background:' + a.color + ';height:60px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:0.8rem;">' + escapeHtml(a.nombre) + '</div>';
+                    gHtml += '<div style="padding:1rem;display:flex;flex-direction:column;gap:0.5rem;">';
+                    gHtml += '<div style="height:30px;background:' + a.color + '22;border-radius:6px;"></div>';
+                    gHtml += '<div style="height:20px;background:rgba(255,255,255,0.05);border-radius:4px;width:80%;"></div>';
+                    gHtml += '<div style="height:20px;background:rgba(255,255,255,0.05);border-radius:4px;width:60%;"></div>';
+                    gHtml += '<div style="height:40px;background:' + a.color + '11;border-radius:8px;margin-top:0.5rem;"></div>';
+                    gHtml += '<div style="height:20px;background:rgba(255,255,255,0.05);border-radius:4px;width:70%;"></div>';
+                    gHtml += '<div style="height:20px;background:rgba(255,255,255,0.05);border-radius:4px;width:50%;"></div>';
+                    gHtml += '</div>';
+                    gHtml += '</div>';
+                    gHtml += '</div>';
+                    gHtml += '</div>';
+                });
+                gallery.innerHTML = gHtml;
+            }
+            
+            // Tutoriales
+            var tutorials = document.getElementById('exp-tutorials');
+            if(tutorials) {
+                var tuts = [
+                    { app: 'RiderTrack', icon: 'fa-solid fa-motorcycle', color: '#0ea5e9', title: 'Importar Excel', steps: ['Abrí RiderTrack', 'Tocá "Importar" en la topbar', 'Seleccioná tu archivo .xlsx', 'Los clientes aparecen automáticamente'] },
+                    { app: 'RiderTrack', icon: 'fa-solid fa-motorcycle', color: '#0ea5e9', title: 'Marcar entregado', steps: ['Tocá el cliente', 'Elegí el tipo de pago', 'Confirmá el monto', 'El cliente se marca como entregado'] },
+                    { app: 'RiderTrack', icon: 'fa-solid fa-motorcycle', color: '#0ea5e9', title: 'Usar el chat interno', steps: ['Tocá 💬 en la topbar', 'Ingresá el código de invitación', 'Elegí tu nombre y foto', 'Ya podés chatear con tu equipo'] },
+                    { app: 'RiderTrack', icon: 'fa-solid fa-motorcycle', color: '#0ea5e9', title: 'Finalizar ruta', steps: ['Al terminar tu día', 'Tocá "🏁 FINALIZAR RUTA"', 'Mirá el confeti 🎉', 'Revisá tus estadísticas'] },
+                    { app: 'RiderTrack', icon: 'fa-solid fa-motorcycle', color: '#0ea5e9', title: 'Descargar Excel', steps: ['Tocá "💾 GUARDAR Y CERRAR RUTA"', 'El Excel se descarga con todo', 'Incluye OBSERVACIONES y MOTIVO', 'Vuelto de empresa al final'] },
+                    { app: 'General', icon: 'fa-solid fa-wand-magic-sparkles', color: '#8b5cf6', title: 'Spotify integrado', steps: ['Tocá 🎵 en la topbar', 'Conectá tu cuenta de Spotify', 'Elegí una canción', 'La música sigue al cerrar el modal'] }
+                ];
+                var tHtml = '';
+                tuts.forEach(function(t, idx) {
+                    var delay = idx % 2 === 0 ? '' : ' delay-1';
+                    tHtml += '<div class="bento-card reveal' + delay + '" style="padding:1.5rem;cursor:pointer;" onclick="this.querySelector(\'.tut-steps\').style.display = this.querySelector(\'.tut-steps\').style.display === \'none\' ? \'block\' : \'none\';">';
+                    tHtml += '<div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:0.5rem;">';
+                    tHtml += '<div style="width:36px;height:36px;border-radius:8px;background:' + t.color + '22;display:flex;align-items:center;justify-content:center;"><i class="' + t.icon + '" style="color:' + t.color + ';"></i></div>';
+                    tHtml += '<div><strong style="font-size:0.95rem;">' + escapeHtml(t.title) + '</strong><br><span style="font-size:0.7rem;color:var(--text-tertiary);">' + escapeHtml(t.app) + '</span></div>';
+                    tHtml += '<i class="fa-solid fa-chevron-down" style="margin-left:auto;color:var(--text-tertiary);"></i>';
+                    tHtml += '</div>';
+                    tHtml += '<div class="tut-steps" style="display:none;padding-top:0.5rem;">';
+                    tHtml += '<ol style="padding-left:1.2rem;color:var(--text-secondary);font-size:0.85rem;line-height:1.8;">';
+                    t.steps.forEach(function(s) { tHtml += '<li>' + escapeHtml(s) + '</li>'; });
+                    tHtml += '</ol>';
+                    tHtml += '</div>';
+                    tHtml += '</div>';
+                });
+                tutorials.innerHTML = tHtml;
+            }
+            
+            app.initScrollReveal();
+            
+            // Star Wars changelog en Experiencia
+            var expSw = document.getElementById('exp-sw-content');
+            if(expSw) {
+                var allR = [];
+                HUB_APPS.forEach(function(a) {
+                    var rels = HUB_RELEASES_CACHE[a.id] || [];
+                    rels.forEach(function(r) { allR.push({ app: a, rel: r, date: new Date(r.date).getTime() }); });
+                });
+                allR.sort(function(a, b) { return b.date - a.date; });
+                var top8 = allR.slice(0, 8);
+                if(top8.length > 0) {
+                    var swHtml = '<div style="text-align:center;margin-bottom:1.5rem;"><div style="font-size:1.2rem;font-weight:800;color:#fff;letter-spacing:0.1em;">TRACKVERSE</div><div style="font-size:0.7rem;color:var(--text-tertiary);">ACTUALIZACIONES</div></div>';
+                    top8.forEach(function(item) {
+                        var a = item.app, r = item.rel;
+                        var dateTxt = new Date(r.date).toLocaleDateString('es-PE', {day:'2-digit',month:'short'});
+                        var notes = (r.notes || '').substring(0, 200);
+                        swHtml += '<div class="sw-card">';
+                        swHtml += '<div class="sw-card-title"><span class="sw-card-tag" style="background:' + a.color + '22;color:' + a.color + ';">' + escapeHtml(r.tag) + '</span><span class="sw-card-app">' + escapeHtml(a.nombre) + '</span><span class="sw-card-date">' + dateTxt + '</span></div>';
+                        swHtml += '<div style="color:var(--text-secondary);font-size:0.78rem;line-height:1.6;white-space:pre-wrap;">' + escapeHtml(notes) + '</div>';
+                        swHtml += '</div>';
+                    });
+                    expSw.innerHTML = swHtml;
+                    var dur = Math.max(25, top8.length * 6);
+                    expSw.style.animation = 'swScroll ' + dur + 's linear infinite';
+                } else {
+                    expSw.innerHTML = '<div style="text-align:center;color:var(--text-tertiary);padding:3rem;">Sin actualizaciones aún.</div>';
+                }
+            }
+        }
+
+        // Demo: Cronómetro
+        function demoToggleCrono() {
+            var btn = document.getElementById('demo-crono-btn');
+            var display = document.getElementById('demo-crono');
+            if(_demoCronoInterval) {
+                clearInterval(_demoCronoInterval);
+                _demoCronoInterval = null;
+                btn.textContent = '▶ Iniciar';
+                btn.style.background = 'var(--brand-rider)';
+            } else {
+                btn.textContent = '⏸ Pausar';
+                btn.style.background = '#f59e0b';
+                _demoCronoInterval = setInterval(function() {
+                    _demoCronoSecs++;
+                    var h = Math.floor(_demoCronoSecs / 3600);
+                    var m = Math.floor((_demoCronoSecs % 3600) / 60);
+                    var s = _demoCronoSecs % 60;
+                    if(display) display.textContent = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+                }, 1000);
+            }
+        }
+
+        // Demo: Estados
+        function demoSetEstado(estado) {
+            var result = document.getElementById('demo-estado-result');
+            if(!result) return;
+            var config = {
+                pendiente: { label: '⏳ Pendiente', color: '#94a3b8', desc: 'El cliente todavía no fue visitado' },
+                efectivo: { label: '💵 Efectivo', color: '#22c55e', desc: 'Pago recibido en efectivo ✅' },
+                fallida: { label: '❌ Fallida', color: '#ef4444', desc: 'No se pudo entregar el pedido' },
+                reprogramar: { label: '🔄 Reprogramar', color: '#f59e0b', desc: 'El cliente pidió reprogramar la entrega' }
+            };
+            var c = config[estado] || config.pendiente;
+            result.innerHTML = '<div style="color:' + c.color + ';font-weight:700;">' + c.label + '</div><div style="color:var(--text-secondary);font-size:0.8rem;margin-top:0.3rem;">' + c.desc + '</div>';
+            result.style.borderColor = c.color + '44';
+        }
+
+        // Demo: Stars
+        function demoSetStars(val) {
+            var stars = document.querySelectorAll('#demo-stars span');
+            var result = document.getElementById('demo-stars-result');
+            var labels = ['😥 Muy malo', '😕 Regular', '😐 Normal', '😊 Bueno', '🤩 Excelente'];
+            stars.forEach(function(s, i) {
+                s.style.color = i < val ? '#fbbf24' : 'rgba(255,255,255,0.2)';
+            });
+            if(result) result.textContent = labels[val - 1] || '';
         }
 
         // ─── CHANGELOG EDITOR ────────────────────────────────────
