@@ -1217,11 +1217,14 @@
                     <div class="dash-panel">
                         <div class="dash-panel-head">
                             <div class="dash-panel-title">📝 Editor de Changelogs</div>
-                            <select id="changelog-app-select" onchange="cargarChangelogs()" style="background:var(--bg-elevated);color:#fff;border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:0.5rem 1rem;font-family:inherit;">
-                                <option value="">Seleccionar app...</option>
-                            </select>
+                            <div style="display:flex;gap:0.5rem;align-items:center;">
+                                <select id="changelog-app-select" onchange="cargarChangelogs()" style="background:var(--bg-elevated);color:#fff;border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:0.5rem 1rem;font-family:inherit;">
+                                    <option value="">Seleccionar app...</option>
+                                </select>
+                                <button onclick="abrirModalNuevoChangelog()" class="btn-action" style="background:var(--brand-health);"><i class="fa-solid fa-plus"></i> Nueva Actualización</button>
+                            </div>
                         </div>
-                        <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:1.5rem;">Seleccioná una app para ver y editar las notas de versión de cada release. Los cambios se guardan directamente en GitHub.</p>
+                        <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:1.5rem;">Seleccioná una app para ver, editar, borrar o crear notas de versión. Los cambios se guardan en GitHub.</p>
                         <div id="changelog-list" style="display:flex;flex-direction:column;gap:1rem;">
                             <div style="text-align:center;padding:2rem;color:var(--text-secondary);">Seleccioná una app arriba para ver sus versiones.</div>
                         </div>
@@ -1271,6 +1274,37 @@
                 <div><label class="admin-label">Categoría</label><input type="text" id="form-app-categoria" class="admin-input" placeholder="Productividad" value="General"></div>
                 <div><label class="admin-label">ID</label><input type="text" id="form-app-id" class="admin-input" placeholder="ridertrack"></div>
                 <div style="grid-column: span 2;"><button onclick="guardarAppForm()" class="admin-submit">💾 Guardar App</button></div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- MODAL: NUEVO CHANGELOG -->
+    <div id="form-changelog-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);z-index:9600;align-items:center;justify-content:center;padding:20px">
+        <div style="background:var(--bg-elevated);border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:28px 24px;max-width:500px;width:100%;max-height:90vh;overflow-y:auto">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+                <h3 style="font-size:1.3rem">✍️ Nueva Actualización</h3>
+                <button onclick="cerrarModalNuevoChangelog()" style="background:rgba(255,255,255,0.08);border:none;color:#fff;width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:1rem">✕</button>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:1rem;">
+                <div>
+                    <label class="admin-label">App</label>
+                    <select id="new-cl-app" style="width:100%;background:var(--bg-base);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;padding:0.6rem 1rem;font-family:inherit;"></select>
+                </div>
+                <div>
+                    <label class="admin-label">Título de la versión</label>
+                    <input type="text" id="new-cl-title" class="admin-input" placeholder="ej. v5.6 - Actualización de Chat">
+                </div>
+                <div>
+                    <label class="admin-label">Tag (versión corta)</label>
+                    <input type="text" id="new-cl-tag" class="admin-input" placeholder="ej. v5.6">
+                </div>
+                <div>
+                    <label class="admin-label">Notas de actualización</label>
+                    <textarea id="new-cl-body" class="admin-input" rows="6" placeholder="- Nuevo botón de finalizar ruta con confeti&#10;- Fix del odómetro GPS&#10;- Mejora en las estadísticas" style="resize:vertical;"></textarea>
+                    <p style="color:var(--text-tertiary);font-size:0.7rem;margin-top:0.3rem;">Usá una línea por cada cambio. Las que digan "nuevo" van a Novedades, las que digan "fix" a Correcciones.</p>
+                </div>
+                <button onclick="crearNuevoChangelog()" class="admin-submit">🚀 Publicar Actualización</button>
             </div>
         </div>
     </div>
@@ -1618,19 +1652,27 @@
             var appData = HUB_APPS.filter(function(a){ return a.id === appId; })[0];
             var rels = HUB_RELEASES_CACHE[appId] || [];
             if(rels.length === 0){
-                cont.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-secondary)">Esta app no tiene releases todavía.</div>';
+                cont.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-secondary)">Esta app no tiene versiones todavía. Creá una con el botón "Nueva Actualización".</div>';
                 return;
             }
             var html = '';
-            rels.forEach(function(r){
+            rels.forEach(function(r, idx){
                 var dateTxt = new Date(r.date).toLocaleDateString('es-PE',{day:'2-digit',month:'short',year:'numeric'});
-                html += '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:1.2rem;">' +
+                var hasApk = r.size > 0;
+                html += '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:1.2rem;' + (idx === 0 ? 'border-color:' + (appData ? appData.color : '#fff') + '33;' : '') + '">' +
                     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem">' +
-                      '<strong style="color:' + (appData ? appData.color : '#fff') + '">' + escapeHtml(r.tag) + '</strong>' +
+                      '<div style="display:flex;align-items:center;gap:0.5rem">' +
+                        '<strong style="color:' + (appData ? appData.color : '#fff') + '">' + escapeHtml(r.tag) + '</strong>' +
+                        (idx === 0 ? '<span style="background:' + (appData ? appData.color : '#0ea5e9') + ';color:#fff;font-size:0.6rem;padding:2px 6px;border-radius:4px;font-weight:800;">ÚLTIMA</span>' : '') +
+                        (hasApk ? '<span style="background:rgba(34,197,94,0.15);color:#22c55e;font-size:0.6rem;padding:2px 6px;border-radius:4px;">📦 APK</span>' : '<span style="background:rgba(245,158,11,0.15);color:#f59e0b;font-size:0.6rem;padding:2px 6px;border-radius:4px;">📝 Solo notas</span>') +
+                      '</div>' +
                       '<span style="font-size:0.7rem;color:var(--text-tertiary)">' + dateTxt + '</span>' +
                     '</div>' +
-                    '<textarea id="changelog-text-' + r.id + '" style="width:100%;min-height:80px;background:var(--bg-base);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;padding:0.8rem;font-family:inherit;font-size:0.85rem;resize:vertical;margin-bottom:0.5rem;" placeholder="Notas de versión...">' + escapeHtml(r.notes || '') + '</textarea>' +
-                    '<button onclick="guardarChangelog(' + r.id + ',\'' + appId + '\')" style="background:' + (appData ? appData.color : '#0ea5e9') + ';color:#fff;border:none;padding:0.5rem 1.5rem;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.8rem;">💾 Guardar Cambios</button>' +
+                    '<textarea id="changelog-text-' + r.id + '" style="width:100%;min-height:80px;background:var(--bg-base);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;padding:0.8rem;font-family:inherit;font-size:0.85rem;resize:vertical;margin-bottom:0.5rem;" placeholder="Escribí las notas de versión...">' + escapeHtml(r.notes || '') + '</textarea>' +
+                    '<div style="display:flex;gap:0.5rem;">' +
+                      '<button onclick="guardarChangelog(' + r.id + ',\'' + appId + '\')" style="background:' + (appData ? appData.color : '#0ea5e9') + ';color:#fff;border:none;padding:0.5rem 1.2rem;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.8rem;flex:1;">💾 Guardar</button>' +
+                      '<button onclick="borrarChangelog(' + r.id + ',\'' + appId + '\',\'' + escapeHtml(r.tag) + '\')" style="background:rgba(239,68,68,0.15);color:#f87171;border:1px solid rgba(239,68,68,0.3);padding:0.5rem 1.2rem;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.8rem;">🗑️ Borrar</button>' +
+                    '</div>' +
                 '</div>';
             });
             cont.innerHTML = html;
@@ -1663,6 +1705,102 @@
                 btn.innerHTML = '❌ Error';
                 setTimeout(function(){ btn.innerHTML = origText; btn.disabled = false; }, 1500);
                 alert('Error al guardar: ' + err.message);
+            });
+        }
+        function borrarChangelog(releaseId, appId, tag) {
+            var token = localStorage.getItem('hub-github-token');
+            if(!token){ alert('Configurá el token de GitHub primero en Configuración.'); return; }
+            var appData = HUB_APPS.filter(function(a){ return a.id === appId; })[0];
+            if(!appData) return;
+            if(!confirm('¿Borrar la versión "' + tag + '" de ' + appData.nombre + '?\n\nEsto NO borra el APK ni el código, solo elimina el release de GitHub.\nNo se puede deshacer.')) return;
+            var url = 'https://api.github.com/repos/' + appData.repo + '/releases/' + releaseId;
+            fetch(url, {
+                method: 'DELETE',
+                headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github+json' }
+            })
+            .then(function(r){ if(!r.ok && r.status !== 204) throw new Error('Error'); })
+            .then(function(){
+                // También borrar el tag
+                var tagUrl = 'https://api.github.com/repos/' + appData.repo + '/git/refs/tags/' + encodeURIComponent(tag);
+                fetch(tagUrl, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github+json' }
+                }).catch(function(){}); // ignora error si no existe el tag
+                // Actualizar cache
+                var rels = HUB_RELEASES_CACHE[appId] || [];
+                HUB_RELEASES_CACHE[appId] = rels.filter(function(r){ return r.id !== releaseId; });
+                alert('✅ Versión "' + tag + '" borrada.');
+                cargarChangelogs();
+            })
+            .catch(function(err){ alert('Error al borrar: ' + err.message); });
+        }
+        function abrirModalNuevoChangelog() {
+            // Llenar select de apps
+            var sel = document.getElementById('new-cl-app');
+            var html = '';
+            HUB_APPS.forEach(function(a){ html += '<option value="' + a.id + '">' + a.nombre + '</option>'; });
+            sel.innerHTML = html;
+            // Limpiar campos
+            document.getElementById('new-cl-title').value = '';
+            document.getElementById('new-cl-tag').value = '';
+            document.getElementById('new-cl-body').value = '';
+            // Mostrar modal
+            document.getElementById('form-changelog-modal').style.display = 'flex';
+        }
+        function cerrarModalNuevoChangelog() {
+            document.getElementById('form-changelog-modal').style.display = 'none';
+        }
+        function crearNuevoChangelog() {
+            var token = localStorage.getItem('hub-github-token');
+            if(!token){ alert('Configurá el token de GitHub primero en Configuración.'); return; }
+            var appId = document.getElementById('new-cl-app').value;
+            var title = document.getElementById('new-cl-title').value.trim();
+            var tag = document.getElementById('new-cl-tag').value.trim();
+            var body = document.getElementById('new-cl-body').value.trim();
+            if(!appId || !tag){ alert('Falta seleccionar app o ingresar tag'); return; }
+            var appData = HUB_APPS.filter(function(a){ return a.id === appId; })[0];
+            if(!appData) return;
+            var btn = event.target;
+            var origText = btn.innerHTML;
+            btn.innerHTML = '⏳ Publicando...';
+            btn.disabled = true;
+            var url = 'https://api.github.com/repos/' + appData.repo + '/releases';
+            fetch(url, {
+                method: 'POST',
+                headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    tag_name: tag,
+                    name: title || tag,
+                    body: body || 'Sin notas.',
+                    draft: false,
+                    prerelease: false,
+                    make_latest: 'true'
+                })
+            })
+            .then(function(r){ if(!r.ok) throw new Error('Error al crear'); return r.json(); })
+            .then(function(data){
+                // Actualizar cache
+                var newRel = {
+                    id: data.id, tag: data.tag_name, name: data.name || data.tag_name,
+                    date: data.published_at, size: 0, url: '',
+                    downloads: 0, notes: data.body || ''
+                };
+                if(!HUB_RELEASES_CACHE[appId]) HUB_RELEASES_CACHE[appId] = [];
+                HUB_RELEASES_CACHE[appId].unshift(newRel);
+                btn.innerHTML = '✅ Publicado';
+                setTimeout(function(){
+                    cerrarModalNuevoChangelog();
+                    // Seleccionar la app en el dropdown y recargar
+                    document.getElementById('changelog-app-select').value = appId;
+                    cargarChangelogs();
+                    btn.innerHTML = origText;
+                    btn.disabled = false;
+                }, 1000);
+            })
+            .catch(function(err){
+                btn.innerHTML = '❌ Error';
+                setTimeout(function(){ btn.innerHTML = origText; btn.disabled = false; }, 1500);
+                alert('Error: ' + err.message + '\n\n¿El tag "' + tag + '" ya existe? Probá con otro.');
             });
         }
 
