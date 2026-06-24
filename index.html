@@ -482,6 +482,16 @@
             .admin-sidebar { position: absolute; left: -260px; height: 100%; z-index: 100; transition: left 0.3s; }
             .admin-sidebar.open { left: 0; box-shadow: 20px 0 50px rgba(0,0,0,0.8); }
             .admin-menu-toggle { display: block !important; }
+            /* FIX: Tabla admin responsive en móvil */
+            .admin-table { font-size: 0.8rem; }
+            .admin-table th, .admin-table td { padding: 0.6rem 0.4rem; }
+            .admin-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            .table-actions { flex-direction: column; gap: 0.3rem; }
+            .btn-action { padding: 0.3rem 0.5rem; font-size: 0.7rem; }
+            .admin-form-grid { grid-template-columns: 1fr !important; }
+            .dash-grid-top { grid-template-columns: 1fr 1fr !important; }
+            .dash-panel-head { flex-direction: column; gap: 0.5rem; align-items: flex-start; }
+            .dash-panel-head button, .dash-panel-head select { width: 100%; }
         }
         .admin-menu-toggle { display: none; margin-right: 1rem; font-size: 1.2rem; cursor: pointer; }
 
