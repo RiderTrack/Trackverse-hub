@@ -1190,18 +1190,14 @@
                 <div id="tab-apps" class="admin-tab-content">
                     <div class="dash-panel">
                         <div class="dash-panel-head">
-                            <div class="dash-panel-title">Gestión de Binarios (APKs)</div>
-                            <button class="btn-action" style="background: var(--brand-rider);"><i class="fa-solid fa-upload"></i> Subir APK</button>
+                            <div class="dash-panel-title">Gestión de Apps</div>
+                            <button class="btn-action" style="background: var(--brand-rider);" onclick="abrirModalNuevaApp()"><i class="fa-solid fa-plus"></i> Agregar App</button>
                         </div>
                         <div class="admin-table-wrap">
                             <table class="admin-table">
                                 <thead><tr><th>Aplicación</th><th>Versión</th><th>Estado</th><th>Descargas</th><th>Acciones</th></tr></thead>
-                                <tbody>
-                                    <tr><td><strong>RiderTrack Pro</strong></td><td>v5.2.0</td><td><span class="status-badge status-active">Estable</span></td><td>5,230</td><td class="table-actions"><button class="btn-action"><i class="fa-solid fa-pen"></i></button><button class="btn-action danger"><i class="fa-solid fa-trash"></i></button></td></tr>
-                                    <tr><td><strong>RiderTrack Nightly</strong></td><td>v6.0-b1</td><td><span class="status-badge status-beta">Beta</span></td><td>420</td><td class="table-actions"><button class="btn-action"><i class="fa-solid fa-pen"></i></button><button class="btn-action danger"><i class="fa-solid fa-trash"></i></button></td></tr>
-                                    <tr><td><strong>FitTrack Analytics</strong></td><td>v3.1.5</td><td><span class="status-badge status-active">Estable</span></td><td>3,800</td><td class="table-actions"><button class="btn-action"><i class="fa-solid fa-pen"></i></button><button class="btn-action danger"><i class="fa-solid fa-trash"></i></button></td></tr>
-                                    <tr><td><strong>HealthTrack</strong></td><td>v2.0.1</td><td><span class="status-badge status-active">Estable</span></td><td>2,100</td><td class="table-actions"><button class="btn-action"><i class="fa-solid fa-pen"></i></button><button class="btn-action danger"><i class="fa-solid fa-trash"></i></button></td></tr>
-                                    <tr><td><strong>WalletTrack</strong></td><td>v4.5.0</td><td><span class="status-badge status-active">Estable</span></td><td>1,320</td><td class="table-actions"><button class="btn-action"><i class="fa-solid fa-pen"></i></button><button class="btn-action danger"><i class="fa-solid fa-trash"></i></button></td></tr>
+                                <tbody id="admin-apps-tbody">
+                                    <tr><td colspan="5" style="text-align:center;padding:30px;color:var(--text-secondary)">Cargando apps...</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -1231,29 +1227,63 @@
                 <!-- TAB 4: LOGS / CHANGELOG -->
                 <div id="tab-logs" class="admin-tab-content">
                     <div class="dash-panel">
-                        <div class="dash-panel-head"><div class="dash-panel-title">Publicar Actualización</div></div>
-                        <form onsubmit="event.preventDefault(); alert('Changelog guardado');" class="admin-form-grid">
-                            <div><label class="admin-label">Versión</label><input type="text" class="admin-input" placeholder="ej. v5.3.0"></div>
-                            <div><label class="admin-label">Fecha</label><input type="date" class="admin-input"></div>
-                            <div style="grid-column: span 2;"><label class="admin-label">Novedades (Markdown soportado)</label><textarea class="admin-input" rows="4" placeholder="- Nueva función X..."></textarea></div>
-                            <div style="grid-column: span 2;"><button type="submit" class="admin-submit">Publicar en Web Pública</button></div>
-                        </form>
+                        <div class="dash-panel-head">
+                            <div class="dash-panel-title">📝 Editor de Changelogs</div>
+                            <select id="changelog-app-select" onchange="cargarChangelogs()" style="background:var(--bg-elevated);color:#fff;border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:0.5rem 1rem;font-family:inherit;">
+                                <option value="">Seleccionar app...</option>
+                            </select>
+                        </div>
+                        <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:1.5rem;">Seleccioná una app para ver y editar las notas de versión de cada release. Los cambios se guardan directamente en GitHub.</p>
+                        <div id="changelog-list" style="display:flex;flex-direction:column;gap:1rem;">
+                            <div style="text-align:center;padding:2rem;color:var(--text-secondary);">Seleccioná una app arriba para ver sus versiones.</div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- TAB 5: SETTINGS -->
                 <div id="tab-settings" class="admin-tab-content">
                     <div class="dash-panel">
-                        <div class="dash-panel-head"><div class="dash-panel-title">Seguridad de la Plataforma</div></div>
-                        <form onsubmit="event.preventDefault(); alert('Claves actualizadas');" class="admin-form-grid">
-                            <div><label class="admin-label">Nueva Clave Catálogo Privado</label><input type="password" class="admin-input" placeholder="********"></div>
-                            <div><label class="admin-label">Nueva Clave Administrador</label><input type="password" class="admin-input" placeholder="********"></div>
-                            <div style="grid-column: span 2;"><button type="submit" class="admin-submit">Actualizar Credenciales</button></div>
+                        <div class="dash-panel-head"><div class="dash-panel-title">🔐 Password de Acceso</div></div>
+                        <form onsubmit="event.preventDefault(); guardarPasswords();" class="admin-form-grid">
+                            <div style="grid-column: span 2;"><label class="admin-label">Nuevo Password (catálogo + admin)</label><input type="password" id="set-pwd-catalog" class="admin-input" placeholder="Nuevo password"></div>
+                            <div style="grid-column: span 2;"><button type="submit" class="admin-submit">Actualizar Password</button></div>
                         </form>
+                    </div>
+                    <div class="dash-panel" style="margin-top:1.5rem;">
+                        <div class="dash-panel-head"><div class="dash-panel-title">🔑 Token de GitHub</div></div>
+                        <form onsubmit="event.preventDefault(); guardarToken();" class="admin-form-grid">
+                            <div style="grid-column: span 2;"><label class="admin-label">Personal Access Token (ghp_...)</label><input type="password" id="set-github-token" class="admin-input" placeholder="ghp_xxxxxxxxxxxx"></div>
+                            <div style="grid-column: span 2;"><button type="submit" class="admin-submit">Guardar Token</button></div>
+                        </form>
+                        <p style="color:var(--text-tertiary);font-size:0.75rem;padding:10px 0">Necesario para editar apps y changelogs. Crealo en github.com/settings/tokens con permiso "repo".</p>
+                    </div>
+                    <div class="dash-panel" style="margin-top:1.5rem;">
+                        <div class="dash-panel-head"><div class="dash-panel-title">➕ Agregar / Editar Apps</div></div>
+                        <button onclick="abrirModalNuevaApp()" class="admin-submit" style="width:100%;">➕ Agregar Nueva App</button>
                     </div>
                 </div>
 
             </div> <!-- End Scroll -->
+        </div>
+    </div>
+
+    <!-- MODAL: AGREGAR/EDITAR APP -->
+    <div id="form-app-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);z-index:9600;align-items:center;justify-content:center;padding:20px">
+        <div style="background:var(--bg-elevated);border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:28px 24px;max-width:500px;width:100%;max-height:90vh;overflow-y:auto">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+                <h3 id="form-app-title" style="font-size:1.3rem">Agregar Nueva App</h3>
+                <button onclick="cerrarModalApp()" style="background:rgba(255,255,255,0.08);border:none;color:#fff;width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:1rem">✕</button>
+            </div>
+            <div class="admin-form-grid">
+                <div><label class="admin-label">Nombre *</label><input type="text" id="form-app-nombre" class="admin-input" placeholder="RiderTrack"></div>
+                <div><label class="admin-label">Color</label><input type="color" id="form-app-color" class="admin-input" style="height:42px;padding:0" value="#0ea5e9"></div>
+                <div style="grid-column: span 2;"><label class="admin-label">Icono FontAwesome</label><input type="text" id="form-app-icono" class="admin-input" placeholder="fa-solid fa-motorcycle"></div>
+                <div style="grid-column: span 2;"><label class="admin-label">Repo de GitHub *</label><input type="text" id="form-app-repo" class="admin-input" placeholder="RiderTrack/ridertrack.github.io"></div>
+                <div style="grid-column: span 2;"><label class="admin-label">Descripción</label><textarea id="form-app-desc" class="admin-input" rows="3" placeholder="App de gestión..."></textarea></div>
+                <div><label class="admin-label">Categoría</label><input type="text" id="form-app-categoria" class="admin-input" placeholder="Productividad" value="General"></div>
+                <div><label class="admin-label">ID</label><input type="text" id="form-app-id" class="admin-input" placeholder="ridertrack"></div>
+                <div style="grid-column: span 2;"><button onclick="guardarAppForm()" class="admin-submit">💾 Guardar App</button></div>
+            </div>
         </div>
     </div>
 
@@ -1297,7 +1327,7 @@
                 if(viewId === 'downloads') renderDownloads();
                 if(viewId === 'info') renderInfoDownloads();
                 if(viewId === 'private-catalog') renderPrivateCatalog();
-                if(viewId === 'admin-dashboard'){ app.renderAdminApps(); app.renderChart(); }
+                if(viewId === 'admin-dashboard'){ app.renderAdminApps(); app.renderChart(); cargarChangelogSelect(); }
             },
 
             login: function(e, type) {
@@ -1511,6 +1541,72 @@
             });
             grid.innerHTML = html;
             app.initScrollReveal();
+        }
+
+        // ─── CHANGELOG EDITOR ────────────────────────────────────
+        function cargarChangelogSelect() {
+            var sel = document.getElementById('changelog-app-select');
+            if(!sel) return;
+            var html = '<option value="">Seleccionar app...</option>';
+            HUB_APPS.forEach(function(a){
+                html += '<option value="' + a.id + '">' + a.nombre + '</option>';
+            });
+            sel.innerHTML = html;
+        }
+        function cargarChangelogs() {
+            var appId = document.getElementById('changelog-app-select').value;
+            var cont = document.getElementById('changelog-list');
+            if(!cont) return;
+            if(!appId){ cont.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-secondary)">Seleccioná una app arriba.</div>'; return; }
+            var appData = HUB_APPS.filter(function(a){ return a.id === appId; })[0];
+            var rels = HUB_RELEASES_CACHE[appId] || [];
+            if(rels.length === 0){
+                cont.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-secondary)">Esta app no tiene releases todavía.</div>';
+                return;
+            }
+            var html = '';
+            rels.forEach(function(r){
+                var dateTxt = new Date(r.date).toLocaleDateString('es-PE',{day:'2-digit',month:'short',year:'numeric'});
+                html += '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:1.2rem;">' +
+                    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem">' +
+                      '<strong style="color:' + (appData ? appData.color : '#fff') + '">' + escapeHtml(r.tag) + '</strong>' +
+                      '<span style="font-size:0.7rem;color:var(--text-tertiary)">' + dateTxt + '</span>' +
+                    '</div>' +
+                    '<textarea id="changelog-text-' + r.id + '" style="width:100%;min-height:80px;background:var(--bg-base);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;padding:0.8rem;font-family:inherit;font-size:0.85rem;resize:vertical;margin-bottom:0.5rem;" placeholder="Notas de versión...">' + escapeHtml(r.notes || '') + '</textarea>' +
+                    '<button onclick="guardarChangelog(' + r.id + ',\'' + appId + '\')" style="background:' + (appData ? appData.color : '#0ea5e9') + ';color:#fff;border:none;padding:0.5rem 1.5rem;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.8rem;">💾 Guardar Cambios</button>' +
+                '</div>';
+            });
+            cont.innerHTML = html;
+        }
+        function guardarChangelog(releaseId, appId) {
+            var token = localStorage.getItem('hub-github-token');
+            if(!token){ alert('Configurá el token de GitHub primero en Configuración.'); return; }
+            var appData = HUB_APPS.filter(function(a){ return a.id === appId; })[0];
+            if(!appData) return;
+            var texto = document.getElementById('changelog-text-' + releaseId).value;
+            var url = 'https://api.github.com/repos/' + appData.repo + '/releases/' + releaseId;
+            var btn = event.target;
+            var origText = btn.innerHTML;
+            btn.innerHTML = '⏳ Guardando...';
+            btn.disabled = true;
+            fetch(url, {
+                method: 'PATCH',
+                headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' },
+                body: JSON.stringify({ body: texto })
+            })
+            .then(function(r){ if(!r.ok) throw new Error('Error'); return r.json(); })
+            .then(function(){
+                // Actualizar cache
+                var rels = HUB_RELEASES_CACHE[appId] || [];
+                rels.forEach(function(r){ if(r.id === releaseId) r.notes = texto; });
+                btn.innerHTML = '✅ Guardado';
+                setTimeout(function(){ btn.innerHTML = origText; btn.disabled = false; }, 1500);
+            })
+            .catch(function(err){
+                btn.innerHTML = '❌ Error';
+                setTimeout(function(){ btn.innerHTML = origText; btn.disabled = false; }, 1500);
+                alert('Error al guardar: ' + err.message);
+            });
         }
 
         // ─── CATÁLOGO PRIVADO ────────────────────────────────────
