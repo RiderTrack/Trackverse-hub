@@ -917,22 +917,10 @@
                 
                 <div class="bento-card bento-half reveal" style="padding: 2rem;">
                     <h3 class="bento-title" style="font-size:1.5rem; margin-bottom: 2rem;"><i class="fa-solid fa-code-commit"></i> Changelog Global</h3>
-                    <div class="changelog-box">
-                        <div class="cl-card">
-                            <div class="cl-head"><span class="cl-ver">v5.2.0</span><span class="cl-date">Hace 2 días</span></div>
-                            <div class="cl-list">
-                                <h4 class="new"><i class="fa-solid fa-star"></i> Novedades</h4>
-                                <ul><li>Integración de Gemini Flash para ChefIA.</li><li>Nuevo motor de renderizado de gráficos en WalletTrack.</li></ul>
-                                <h4 class="fix"><i class="fa-solid fa-wrench"></i> Correcciones</h4>
-                                <ul><li>Fix: Fuga de memoria en el listener de Firebase (RiderTrack).</li></ul>
-                            </div>
-                        </div>
-                        <div class="cl-card">
-                            <div class="cl-head"><span class="cl-ver">v5.1.5</span><span class="cl-date">Hace 2 semanas</span></div>
-                            <div class="cl-list">
-                                <h4 class="new"><i class="fa-solid fa-star"></i> Novedades</h4>
-                                <ul><li>Soporte nativo para Android 14.</li></ul>
-                            </div>
+                    <div class="changelog-box" id="info-changelog-box">
+                        <div style="text-align:center;padding:2rem;color:var(--text-secondary);font-size:0.9rem;">
+                            <i class="fa-solid fa-circle-notch fa-spin" style="font-size:1.5rem;margin-bottom:0.5rem;display:block;"></i>
+                            Cargando changelog...
                         </div>
                     </div>
                 </div>
@@ -1325,7 +1313,7 @@
                 }
                 if(viewId === 'reviews') renderReviews();
                 if(viewId === 'downloads') renderDownloads();
-                if(viewId === 'info') renderInfoDownloads();
+                if(viewId === 'info') { renderInfoDownloads(); renderInfoChangelog(); }
                 if(viewId === 'private-catalog') renderPrivateCatalog();
                 if(viewId === 'admin-dashboard'){ app.renderAdminApps(); app.renderChart(); cargarChangelogSelect(); }
             },
@@ -1509,6 +1497,75 @@
                 html += '</div>';
             });
             cont.innerHTML = html;
+        }
+
+        // ─── CHANGELOG GLOBAL (Info & Stack - dinámico desde GitHub) ──
+        function renderInfoChangelog() {
+            var box = document.getElementById('info-changelog-box');
+            if(!box) return;
+            // Juntar todos los releases de todas las apps, ordenar por fecha
+            var allReleases = [];
+            HUB_APPS.forEach(function(a) {
+                var rels = HUB_RELEASES_CACHE[a.id] || [];
+                rels.forEach(function(r) {
+                    allReleases.push({ app: a, rel: r, date: new Date(r.date).getTime() });
+                });
+            });
+            // Ordenar por fecha descendente (más reciente primero)
+            allReleases.sort(function(a, b) { return b.date - a.date; });
+            // Mostrar las últimas 8
+            var mostrados = allReleases.slice(0, 8);
+            if(mostrados.length === 0) {
+                box.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-secondary);font-size:0.9rem;">Aún no hay versiones publicadas.</div>';
+                return;
+            }
+            var html = '';
+            mostrados.forEach(function(item) {
+                var a = item.app;
+                var r = item.rel;
+                var dateTxt = new Date(r.date).toLocaleDateString('es-PE', { day:'2-digit', month:'short', year:'numeric' });
+                // Formatear notas: dividir por líneas, detectar novedades/correcciones
+                var notes = r.notes || 'Sin notas de versión.';
+                var lines = notes.split('\n').filter(function(l){ return l.trim(); });
+                var novedades = [];
+                var correcciones = [];
+                var otras = [];
+                lines.forEach(function(line) {
+                    var l = line.trim();
+                    if(!l) return;
+                    // Quitar markdown de inicio de lista (-, *, •)
+                    l = l.replace(/^[-*•]\s*/, '');
+                    // Detectar si es novedad o corrección
+                    var lower = l.toLowerCase();
+                    if(lower.indexOf('fix') !== -1 || lower.indexOf('correcci') !== -1 || lower.indexOf('error') !== -1 || lower.indexOf('bug') !== -1) {
+                        correcciones.push(l);
+                    } else if(lower.indexOf('nuevo') !== -1 || lower.indexOf('nueva') !== -1 || lower.indexOf('agreg') !== -1 || lower.indexOf('mejor') !== -1) {
+                        novedades.push(l);
+                    } else {
+                        otras.push(l);
+                    }
+                });
+                html += '<div class="cl-card">';
+                html += '<div class="cl-head"><span class="cl-ver" style="background:' + a.color + '22;color:' + a.color + ';">' + escapeHtml(r.tag) + '</span><span class="cl-date">' + dateTxt + ' · ' + escapeHtml(a.nombre) + '</span></div>';
+                html += '<div class="cl-list">';
+                if(novedades.length > 0) {
+                    html += '<h4 class="new"><i class="fa-solid fa-star"></i> Novedades</h4><ul>';
+                    novedades.forEach(function(n) { html += '<li>' + escapeHtml(n) + '</li>'; });
+                    html += '</ul>';
+                }
+                if(correcciones.length > 0) {
+                    html += '<h4 class="fix"><i class="fa-solid fa-wrench"></i> Correcciones</h4><ul>';
+                    correcciones.forEach(function(c) { html += '<li>' + escapeHtml(c) + '</li>'; });
+                    html += '</ul>';
+                }
+                if(otras.length > 0 && novedades.length === 0 && correcciones.length === 0) {
+                    html += '<ul>';
+                    otras.forEach(function(o) { html += '<li>' + escapeHtml(o) + '</li>'; });
+                    html += '</ul>';
+                }
+                html += '</div></div>';
+            });
+            box.innerHTML = html;
         }
 
         // ─── INFO & STACK DOWNLOADS (cards estilo Play Store) ───
